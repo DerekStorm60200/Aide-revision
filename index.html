@@ -1,0 +1,1163 @@
+<!doctype html>
+<html lang="fr"><head><meta charset="utf-8"><title>Le Bon Verbe</title><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Lexend:wght@400;500;600;700&display=swap">
+<style>
+/* Concept : un écran = une seule tâche. Gros boutons, une couleur par verbe (comme les cartes PDF), aucun chrono. */
+:root {
+  --bg: #f4f6fb; --surface: #ffffff; --fg: #1b2333; --muted: #56627a; --line: #d6dcea;
+  --ink: #1e293b; --on-ink: #ffffff; --star: #eab308;
+  --ok: #15803d; --ok-t: #e3f5ea; --ko: #b42318; --ko-t: #fdeceb;
+  --dec: #1d4ed8; --exp: #15803d; --comp: #c2410c; --just: #6d28d9; --ded: #be185d; --conc: #eab308;
+  --dec-t: #eaf1ff; --exp-t: #e8f7ee; --comp-t: #fff0e6; --just-t: #f0ebff; --ded-t: #fde9f3; --conc-t: #fdf5cc;
+  --on-conc: #1f2937;
+  --pre: #15803d; --rac: #1d4ed8; --suf: #c2410c;
+  --font: "Lexend", Verdana, "DejaVu Sans", Arial, sans-serif;
+  --fs: 1;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0f1420; --surface: #182030; --fg: #eef1f8; --muted: #a3aec6; --line: #2b364d;
+    --ink: #e6ebf7; --on-ink: #0f1420;
+    --ok: #4ade80; --ok-t: #12301f; --ko: #f87171; --ko-t: #3b1717;
+    --dec-t: #16254d; --exp-t: #12301f; --comp-t: #3a1e10; --just-t: #261a4d; --ded-t: #3d1630; --conc-t: #3a3210;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0f1420; --surface: #182030; --fg: #eef1f8; --muted: #a3aec6; --line: #2b364d;
+  --ink: #e6ebf7; --on-ink: #0f1420;
+  --ok: #4ade80; --ok-t: #12301f; --ko: #f87171; --ko-t: #3b1717;
+  --dec-t: #16254d; --exp-t: #12301f; --comp-t: #3a1e10; --just-t: #261a4d; --ded-t: #3d1630; --conc-t: #3a3210;
+  color-scheme: dark;
+}
+html { font-size: calc(17px * var(--fs)); }
+body {
+  margin: 0; background: var(--bg); color: var(--fg); font-family: var(--font); font-size: 1rem; line-height: 1.6;
+  padding-block: 12px 40px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+.wrap { max-width: 640px; margin: 0 auto; display: flex; flex-direction: column; gap: 16px; }
+button { font: inherit; color: inherit; cursor: pointer; }
+button:focus-visible { outline: 3px solid var(--fg); outline-offset: 2px; }
+.top { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.brand { white-space: nowrap; display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: 1.05rem; background: none; border: 0; padding: 4px 0; }
+.dots { display: flex; gap: 3px; }
+.dots i { width: 9px; height: 9px; border-radius: 50%; display: block; }
+.tools { display: flex; gap: 8px; }
+.tool { background: var(--surface); border: 1.5px solid var(--line); border-radius: 12px; min-height: 2.6rem; padding: 0 14px; font-size: .85rem; font-weight: 500; }
+h1 { font-size: 2.3rem; line-height: 1.15; margin: 8px 0 0; font-weight: 700; text-wrap: balance; }
+h2 { font-size: 1.35rem; line-height: 1.3; margin: 0; font-weight: 600; text-wrap: balance; }
+.lead { color: var(--muted); margin: 0; }
+.stack { display: flex; flex-direction: column; gap: 12px; }
+.mode { display: flex; align-items: center; justify-content: space-between; gap: 12px; text-align: left; width: 100%;
+  background: var(--surface); border: 2px solid var(--line); border-radius: 18px; padding: 16px 18px; min-width: 0; }
+.mode:hover { border-color: var(--fg); }
+.mode b { display: block; font-size: 1.15rem; font-weight: 600; }
+.mode span { color: var(--muted); font-size: .9rem; display: block; }
+.stars { display: flex; gap: 2px; flex: none; }
+.stars svg { width: 22px; height: 22px; }
+.stars .on { fill: var(--star); stroke: var(--star); }
+.stars .off { fill: none; stroke: var(--line); }
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; background: var(--ink); color: var(--on-ink);
+  border: 0; border-radius: 16px; min-height: 3.4rem; padding: 0 22px; font-weight: 600; font-size: 1.05rem; }
+.btn.ghost { background: var(--surface); color: var(--fg); border: 2px solid var(--line); }
+.btn.full { width: 100%; }
+.row { display: flex; gap: 10px; flex-wrap: wrap; }
+.row > * { flex: 1 1 11rem; }
+.meta { display: flex; align-items: center; justify-content: space-between; gap: 12px; color: var(--muted); font-size: .9rem; }
+.prog { display: flex; gap: 6px; }
+.prog i { width: 14px; height: 14px; border-radius: 50%; border: 2px solid var(--line); display: block; }
+.prog i.cur { border-color: var(--fg); }
+.prog i.ok { background: var(--ok); border-color: var(--ok); }
+.prog i.ko { background: var(--ko); border-color: var(--ko); }
+.panel { background: var(--surface); border: 1.5px solid var(--line); border-radius: 18px; padding: 16px; display: flex; flex-direction: column; gap: 12px; min-width: 0; }
+.quote { font-size: 1.15rem; line-height: 1.7; margin: 0; }
+.label { font-size: .85rem; font-weight: 600; color: var(--muted); letter-spacing: .04em; text-transform: uppercase; margin: 0; }
+.listen { align-self: flex-start; display: inline-flex; align-items: center; gap: 8px; background: none; border: 1.5px solid var(--line); border-radius: 12px; min-height: 2.6rem; padding: 0 14px; font-size: .9rem; font-weight: 500; }
+.listen svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.verbs { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.verb { display: flex; flex-direction: column; align-items: flex-start; justify-content: center; gap: 0; text-align: left;
+  min-height: 4.4rem; padding: 10px 14px; border: 3px solid transparent; border-radius: 16px; color: #fff; min-width: 0; }
+.verb b { font-size: 1.1rem; font-weight: 700; line-height: 1.25; }
+.verb small { font-size: .75rem; opacity: .95; line-height: 1.3; }
+.dec { background: var(--dec); } .exp { background: var(--exp); } .comp { background: var(--comp); }
+.just { background: var(--just); } .ded { background: var(--ded); } .conc { background: var(--conc); color: var(--on-conc); }
+.verb.dim { opacity: .35; }
+.verb.right, .opt.right { border-color: var(--fg); box-shadow: 0 0 0 3px var(--ok); }
+.verb.wrong, .opt.wrong { border-color: var(--ko); box-shadow: 0 0 0 3px var(--ko); }
+.chip { display: inline-block; padding: 1px 12px; border-radius: 999px; font-weight: 700; color: #fff; white-space: nowrap; }
+.chip.conc { color: var(--on-conc); }
+.doc { background: var(--bg); border-radius: 12px; padding: 12px 14px; margin: 0; }
+.task { margin: 0; font-size: 1.15rem; line-height: 1.9; }
+.opt { text-align: left; width: 100%; background: var(--surface); border: 2px solid var(--line); border-radius: 16px; padding: 14px 16px; line-height: 1.55; min-width: 0; }
+.opt:hover:not(:disabled) { border-color: var(--fg); }
+.opt:disabled { cursor: default; }
+.opt .tag { display: inline-block; margin-top: 8px; padding: 1px 10px; border-radius: 999px; font-size: .8rem; font-weight: 600; color: #fff; }
+.opt .tag.conc { color: var(--on-conc); }
+.fb { border-radius: 16px; padding: 14px 16px; display: flex; flex-direction: column; gap: 6px; border: 2px solid var(--ok); background: var(--ok-t); }
+.fb.no { border-color: var(--ko); background: var(--ko-t); }
+.fb b { font-size: 1.05rem; }
+.fb p { margin: 0; }
+.build { min-height: 5.2rem; border: 2.5px dashed var(--line); border-radius: 16px; padding: 12px; display: flex; flex-wrap: wrap; gap: 8px; align-content: flex-start; }
+.build.full { border-style: solid; }
+.piece { border: 0; border-radius: 12px; padding: 10px 14px; font-weight: 500; line-height: 1.4; text-align: left; color: #fff; min-width: 0; }
+.piece.conc { color: var(--on-conc); }
+.pool { display: flex; flex-wrap: wrap; gap: 10px; }
+.pool button { background: var(--surface); border: 2px solid var(--fg); border-radius: 12px; padding: 10px 14px; line-height: 1.4; text-align: left; font-weight: 500; min-width: 0; }
+.pool button:disabled { visibility: hidden; }
+.msg { min-height: 1.6rem; margin: 0; color: var(--muted); font-size: .95rem; }
+.shake { animation: shake .35s; }
+@keyframes shake { 20% { transform: translateX(-6px); } 40% { transform: translateX(6px); } 60% { transform: translateX(-4px); } 80% { transform: translateX(4px); } }
+@media (prefers-reduced-motion: reduce) { .shake { animation: none; outline: 3px solid var(--ko); } }
+.big-stars { display: flex; gap: 6px; justify-content: center; }
+.big-stars svg { width: 54px; height: 54px; }
+.center { text-align: center; }
+.missed { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 10px; }
+.missed li { border-radius: 14px; padding: 12px 14px; background: var(--bg); display: flex; flex-direction: column; gap: 6px; }
+.rc { border-radius: 18px; overflow: hidden; border: 2.5px solid var(--line); background: var(--surface); }
+.rc h3 { margin: 0; padding: 10px 16px; font-size: 1.2rem; display: flex; gap: 10px; align-items: baseline; flex-wrap: wrap; color: #fff; }
+.rc h3.conc { color: var(--on-conc); }
+.rc h3 small { font-weight: 400; font-size: .85rem; }
+.rc div { padding: 12px 16px; display: flex; flex-direction: column; gap: 6px; }
+.rc p { margin: 0; }
+.rc .ex { background: var(--bg); border-radius: 10px; padding: 8px 12px; }
+@media (max-width: 420px) { .dots { display: none; } h1 { font-size: 2rem; } .verbs { gap: 8px; } .verb small { display: none; } .verb { min-height: 3.6rem; } }
+
+.scroll { overflow-x: auto; }
+.tbl { width: 100%; border-collapse: collapse; font-size: .8rem; }
+.tbl th { text-align: left; font-weight: 600; color: var(--muted); padding: 6px 5px; border-bottom: 2px solid var(--line); white-space: nowrap; }
+.tbl td { padding: 8px 5px; border-bottom: 1px solid var(--line); vertical-align: middle; }
+.tbl .num { text-align: right; font-variant-numeric: tabular-nums; }
+.tbl small { color: var(--muted); margin-left: 4px; }
+.bar { display: inline-block; vertical-align: middle; width: 40px; height: 8px; background: var(--line); border-radius: 4px; }
+.bar i { display: block; height: 100%; background: var(--fg); border-radius: 4px; }
+.kpis { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+.kpi { background: var(--surface); border: 1.5px solid var(--line); border-radius: 14px; padding: 10px 12px; min-width: 0; }
+.kpi b { display: block; font-size: 1.6rem; line-height: 1.2; font-variant-numeric: tabular-nums; }
+.kpi span { font-size: .78rem; color: var(--muted); }
+.days { display: flex; gap: 4px; align-items: flex-end; height: 100px; }
+.days div { flex: 1; min-width: 0; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; gap: 4px; height: 100%; font-size: .62rem; line-height: 1.2; color: var(--muted); text-align: center; }
+.days i { width: 100%; background: var(--fg); border-radius: 4px 4px 0 0; display: block; }
+.days div.zero i { background: var(--line); }
+.bilan { width: 100%; font: inherit; font-size: .85rem; background: var(--bg); color: var(--fg); border: 1.5px solid var(--line); border-radius: 12px; padding: 10px; resize: vertical; }
+
+.pc { display: inline-block; padding: 2px 12px; border-radius: 10px; font-weight: 700; color: #fff; line-height: 1.5; }
+.pc.pre { background: var(--pre); } .pc.rac { background: var(--rac); } .pc.suf { background: var(--suf); }
+.pc.plain { background: var(--line); color: var(--fg); }
+.pc.big { font-size: 1.15rem; padding: 8px 14px; border-radius: 12px; }
+.wordline { display: inline-flex; flex-wrap: wrap; gap: 4px; justify-content: center; }
+.bigword { font-size: 2rem; font-weight: 700; margin: 0; line-height: 1.4; word-break: break-word; }
+.parts { display: flex; flex-direction: column; gap: 6px; margin-top: 4px; }
+.parts > div { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; }
+.rc h3.pre { background: var(--pre); } .rc h3.rac { background: var(--rac); } .rc h3.suf { background: var(--suf); }
+[hidden] { display: none !important; }
+.inp { width: 100%; font: inherit; font-size: 1rem; background: var(--bg); color: var(--fg); border: 2px solid var(--line); border-radius: 12px; padding: 12px; min-height: 48px; }
+.foot { text-align: center; color: var(--muted); font-size: .85rem; margin: 8px 0 0; }
+.link { background: none; border: 0; color: var(--muted); text-decoration: underline; font: inherit; cursor: pointer; padding: 10px 6px; min-height: 44px; }
+.chk { display: flex; gap: 10px; align-items: center; min-height: 44px; }
+.chk input { width: 22px; height: 22px; flex: none; }
+details.stu { border: 1.5px solid var(--line); border-radius: 14px; padding: 10px 12px; background: var(--bg); display: flex; flex-direction: column; gap: 10px; }
+details.stu summary { cursor: pointer; font-weight: 600; min-height: 32px; }
+</style>
+
+<div class="wrap">
+  <div class="top">
+    <button class="brand" data-act="home" aria-label="Retour au menu">
+      <span class="dots" aria-hidden="true"><i class="dec"></i><i class="exp"></i><i class="comp"></i><i class="just"></i><i class="ded"></i><i class="conc"></i></span>
+      Le Bon Verbe
+    </button>
+    <div class="tools">
+      <button class="tool" data-act="size" aria-label="Changer la taille du texte">A+</button>
+      <button class="tool" id="helpbtn" data-act="cards">Cartes</button>
+    </div>
+  </div>
+  <main id="app" class="stack" aria-live="polite"></main>
+</div>
+
+<script>
+"use strict";
+var V = {
+  decrire:   { n: "Décrire",   c: "dec",  h: "je dis ce que je vois" },
+  expliquer: { n: "Expliquer", c: "exp",  h: "je dis comment et pourquoi" },
+  comparer:  { n: "Comparer",  c: "comp", h: "je mets côte à côte" },
+  justifier: { n: "Justifier", c: "just", h: "je donne la preuve" },
+  deduire:   { n: "Déduire",   c: "ded",  h: "je tire la conséquence" },
+  conclure:  { n: "Conclure",  c: "conc", h: "je donne la réponse finale" }
+};
+var ORDER = ["decrire", "expliquer", "comparer", "justifier", "deduire", "conclure"];
+
+/* Mode 1 : quel verbe ? */
+var A = [
+  /* décrire */
+  { t: "Sur la photo, la bronche du fumeur a peu de cils et beaucoup de mucus.", v: "decrire", clue: "On dit seulement ce qu’on voit. Il n’y a pas de « parce que »." },
+  { t: "Le schéma montre un neurone : un corps cellulaire, des ramifications courtes et une longue fibre.", v: "decrire", clue: "On décrit la forme, sans rien expliquer." },
+  { t: "Sur la coupe de muscle, on observe des fibres allongées, rangées côte à côte, avec des stries claires et sombres.", v: "decrire", clue: "« On observe » : on dit ce qu’on voit, rien de plus." },
+  { t: "Le schéma montre le cœur avec quatre cavités : deux oreillettes en haut et deux ventricules en bas.", v: "decrire", clue: "On nomme et on situe ce qu’on voit, sans expliquer." },
+  { t: "Sur le graphique, la fréquence cardiaque passe de 70 à 150 battements par minute pendant l’effort.", v: "decrire", clue: "On lit les valeurs du graphique. On n’explique pas pourquoi." },
+  { t: "La radiographie montre l’os de l’avant-bras séparé en deux morceaux.", v: "decrire", clue: "On dit ce qu’on voit sur l’image." },
+  { t: "Sur la coupe d’intestin, on observe des replis et de nombreuses petites projections en forme de doigts.", v: "decrire", clue: "« On observe » : une description précise, sans « donc »." },
+  { t: "Sur le schéma, le nerf est formé de plusieurs faisceaux de fibres entourés d’une gaine.", v: "decrire", clue: "On décrit l’organisation du nerf, sans expliquer son rôle." },
+  { t: "L’alvéole est entourée de nombreux petits vaisseaux sanguins très fins.", v: "decrire", clue: "On dit ce qu’on voit autour de l’alvéole." },
+  { t: "Le tableau indique que Paul pèse 82 kg et mesure 1,70 m.", v: "decrire", clue: "On lit les données du document, sans les interpréter." },
+  /* expliquer */
+  { t: "Quand on touche une plaque chaude, le récepteur de la peau envoie un message à la moelle épinière, qui commande le muscle. Donc la main se retire.", v: "expliquer", clue: "Des étapes reliées par « donc » : on fait comprendre comment ça marche." },
+  { t: "Le dioxygène passe de l’alvéole vers le sang parce que la paroi est très fine. Ensuite, le sang le transporte vers les muscles.", v: "expliquer", clue: "« Parce que » et « ensuite » : on raconte le mécanisme." },
+  { t: "L’influx nerveux arrive à la jonction neuromusculaire, ce qui libère un neurotransmetteur. Celui-ci déclenche ensuite la contraction de la fibre musculaire.", v: "expliquer", clue: "Des étapes qui s’enchaînent : on explique comment le muscle se contracte." },
+  { t: "Les nutriments passent dans le sang car la paroi de l’intestin grêle est très fine et très étendue. Les replis et les villosités augmentent la surface d’échange.", v: "expliquer", clue: "« Car » : on dit pourquoi et comment les nutriments passent dans le sang." },
+  { t: "Au niveau de l’alvéole, le dioxygène passe vers le sang car il est plus concentré dans l’air alvéolaire. Donc le sang s’enrichit en dioxygène.", v: "expliquer", clue: "« Car » puis « donc » : on explique le sens de l’échange." },
+  { t: "Quand le cœur se contracte, le sang est éjecté dans les artères. Ensuite le cœur se relâche et se remplit de sang à nouveau.", v: "expliquer", clue: "« Ensuite » : on décrit les étapes d’un fonctionnement." },
+  { t: "Pendant l’inspiration, le diaphragme se contracte et s’abaisse, donc le volume du thorax augmente et l’air entre dans les poumons.", v: "expliquer", clue: "« Donc » : on enchaîne les causes et les conséquences." },
+  { t: "Les enzymes digestives découpent les grosses molécules en petites molécules. Ainsi, ces petites molécules peuvent ensuite être absorbées.", v: "expliquer", clue: "On raconte les étapes de la digestion pour faire comprendre." },
+  { t: "Une personne prend du poids quand ses apports énergétiques dépassent durablement ses dépenses. L’excès est donc stocké sous forme de graisse.", v: "expliquer", clue: "« Donc » : on explique le mécanisme de la prise de poids." },
+  { t: "L’influx nerveux circule le long du neurone sous forme de signal électrique. À la synapse, il est transmis au neurone suivant par un messager chimique.", v: "expliquer", clue: "On suit le trajet du message pas à pas." },
+  /* comparer */
+  { t: "Le nerf sensitif amène le message vers la moelle épinière, alors que le nerf moteur l’emmène vers le muscle.", v: "comparer", clue: "« Alors que » : on met deux choses côte à côte." },
+  { t: "Comme la bronche, la trachée est un conduit qui amène l’air, mais la trachée est plus large.", v: "comparer", clue: "« Comme » et « mais » : points communs et différences." },
+  { t: "Les artères ont une paroi épaisse et élastique, alors que les veines ont une paroi plus fine.", v: "comparer", clue: "« Alors que » : on oppose deux structures." },
+  { t: "L’air inspiré contient environ 21 % de dioxygène, alors que l’air expiré en contient environ 16 %.", v: "comparer", clue: "On met en parallèle l’air inspiré et l’air expiré." },
+  { t: "Comme les glucides, les lipides apportent de l’énergie, mais les lipides en apportent plus par gramme.", v: "comparer", clue: "« Comme » (point commun) et « mais » (différence)." },
+  { t: "Le muscle squelettique se contracte quand on le décide, alors que le muscle du cœur se contracte sans que la volonté intervienne.", v: "comparer", clue: "« Alors que » : deux muscles, deux fonctionnements." },
+  { t: "Le système nerveux central comprend l’encéphale et la moelle épinière, tandis que le système nerveux périphérique est formé des nerfs.", v: "comparer", clue: "« Tandis que » : on met les deux systèmes en parallèle." },
+  { t: "La radiographie est rapide et peu coûteuse, mais le scanner donne des images plus détaillées.", v: "comparer", clue: "« Mais » : on met deux examens en parallèle." },
+  { t: "L’oreillette droite reçoit du sang pauvre en dioxygène, alors que l’oreillette gauche reçoit du sang riche en dioxygène.", v: "comparer", clue: "« Alors que » : deux côtés du cœur côte à côte." },
+  { t: "La trachée est tapissée d’un épithélium cilié, alors que la paroi de l’alvéole est très mince et sans cils.", v: "comparer", clue: "« Alors que » : on compare deux parois." },
+  /* justifier */
+  { t: "Le fumeur attrape plus d’infections. En effet, ses cils détruits n’évacuent plus les microbes.", v: "justifier", clue: "« En effet » : on prouve une phrase déjà donnée." },
+  { t: "Le réflexe est rapide. La preuve : le message passe par la moelle épinière, sans attendre le cerveau.", v: "justifier", clue: "« La preuve » : on défend une affirmation avec un argument." },
+  { t: "Le muscle est un tissu excitable. En effet, il se contracte quand il reçoit un influx nerveux.", v: "justifier", clue: "« En effet » : on donne la preuve d’une affirmation." },
+  { t: "L’intestin grêle est adapté à l’absorption. En effet, sa paroi forme des replis et des villosités qui augmentent la surface d’échange.", v: "justifier", clue: "On prouve que l’intestin est adapté à son rôle." },
+  { t: "Le cœur est une pompe musculaire. La preuve : sa paroi est épaisse et se contracte pour envoyer le sang dans les artères.", v: "justifier", clue: "« La preuve » : un argument pour défendre une idée." },
+  { t: "Le tabac est un facteur de risque de maladies respiratoires. En effet, la fumée détruit les cils et irrite les bronches.", v: "justifier", clue: "« En effet » : on appuie l’affirmation par un fait." },
+  { t: "La paroi de l’alvéole est adaptée aux échanges gazeux. En effet, elle est très fine, ce qui facilite la diffusion des gaz.", v: "justifier", clue: "On défend l’idée « adaptée » avec un argument." },
+  { t: "Le neurone est une cellule spécialisée. La preuve : il possède un long prolongement, l’axone, qui conduit l’influx nerveux.", v: "justifier", clue: "« La preuve » : l’affirmation vient d’abord, l’argument ensuite." },
+  { t: "L’IMC de 32 correspond à une obésité. En effet, on parle d’obésité à partir d’un IMC supérieur ou égal à 30.", v: "justifier", clue: "On s’appuie sur une valeur de référence pour prouver." },
+  { t: "Théo doit porter un plâtre. En effet, la radiographie montre que son tibia est fracturé.", v: "justifier", clue: "« En effet » : le document sert de preuve." },
+  /* déduire */
+  { t: "Le nerf moteur est coupé. J’en déduis que le muscle ne recevra plus l’ordre de se contracter.", v: "deduire", clue: "« J’en déduis que » : une seule conséquence logique." },
+  { t: "Le cœur bat à 120 battements par minute au repos. J’en déduis qu’il est trop rapide : c’est une tachycardie.", v: "deduire", clue: "« J’en déduis que » : on tire la conséquence d’un fait." },
+  { t: "La moelle épinière est lésée au niveau du cou. J’en déduis que les quatre membres peuvent être paralysés : c’est une tétraplégie.", v: "deduire", clue: "On part d’un fait et on en tire la conséquence." },
+  { t: "L’IMC de Sam est de 17. J’en déduis qu’il est en insuffisance pondérale.", v: "deduire", clue: "On part d’une valeur et on en tire une conclusion logique." },
+  { t: "Sur l’ECG, l’intervalle entre deux ondes R est très court. J’en déduis que la fréquence cardiaque est élevée.", v: "deduire", clue: "« J’en déduis que » : la conséquence du tracé." },
+  { t: "La saturation en dioxygène du sang de Max est très basse. J’en déduis que ses tissus risquent de manquer de dioxygène.", v: "deduire", clue: "On tire la conséquence d’une mesure." },
+  { t: "Une artère coronaire est bouchée. J’en déduis que la zone du cœur qu’elle irrigue reçoit moins de dioxygène.", v: "deduire", clue: "Un fait, puis « j’en déduis » : la conséquence." },
+  { t: "Une lésion de l’encéphale touche la zone du langage. J’en déduis que la personne risque d’avoir une aphasie.", v: "deduire", clue: "On part de la localisation de la lésion pour en tirer la conséquence." },
+  { t: "L’alimentation de Zoé est très pauvre en fer. J’en déduis qu’elle risque une carence en fer, donc une anémie.", v: "deduire", clue: "On part d’un fait et on en tire la suite logique." },
+  { t: "Un muscle ne reçoit plus d’influx nerveux depuis des semaines. J’en déduis qu’il va perdre du volume.", v: "deduire", clue: "« J’en déduis que » : la conséquence logique du manque d’influx." },
+  /* conclure */
+  { t: "En conclusion, le tabac abîme les cils des bronches : cela gêne l’évacuation du mucus et favorise les infections.", v: "conclure", clue: "« En conclusion » : le bilan final qui répond à la question." },
+  { t: "En conclusion, le réflexe permet de réagir très vite pour se protéger.", v: "conclure", clue: "« En conclusion » : on termine par la réponse." },
+  { t: "En conclusion, le muscle se contracte quand l’influx nerveux arrive : le système nerveux commande donc le mouvement.", v: "conclure", clue: "On termine par la réponse à la question posée." },
+  { t: "En conclusion, l’intestin grêle est l’organe principal de l’absorption des nutriments grâce à sa grande surface.", v: "conclure", clue: "Un bilan final, qui n’ajoute aucune idée nouvelle." },
+  { t: "En conclusion, un apport énergétique trop élevé pendant longtemps explique la prise de poids et peut conduire à l’obésité.", v: "conclure", clue: "« En conclusion » : on résume la réponse." },
+  { t: "En conclusion, la barrière alvéolo-capillaire est très fine, ce qui permet les échanges gazeux entre l’air et le sang.", v: "conclure", clue: "On termine par la réponse, en une phrase." },
+  { t: "En conclusion, le cœur assure la circulation du sang : il envoie du sang riche en dioxygène vers les organes.", v: "conclure", clue: "Le bilan final qui répond à la question." },
+  { t: "En conclusion, une lésion de la moelle épinière entraîne une paralysie sous le niveau de la lésion.", v: "conclure", clue: "« En conclusion » : la réponse finale." },
+  { t: "En conclusion, l’asthme rétrécit les bronches et gêne le passage de l’air.", v: "conclure", clue: "On termine par l’idée à retenir." },
+  { t: "En conclusion, l’influx nerveux est un signal électrique qui permet la communication dans l’organisme.", v: "conclure", clue: "« En conclusion » : le bilan final." }
+];
+
+/* Mode 2 : la bonne réponse */
+var B = [
+  { doc: "Chez le fumeur, les cils des bronches sont détruits.", v: "deduire", task: "ce qui arrive au mucus.",
+    o: [ { v: "decrire", t: "Il y a très peu de cils dans les bronches du fumeur." },
+         { v: "deduire", t: "J’en déduis que le mucus n’est plus évacué : il s’accumule." },
+         { v: "conclure", t: "En conclusion, le tabac abîme les bronches." } ] },
+  { doc: "Au repos, le cœur de Léa bat à 120 battements par minute.", v: "comparer", task: "cette valeur à la valeur normale (60 à 100 au repos).",
+    o: [ { v: "comparer", t: "Son cœur bat à 120 alors que la valeur normale au repos est de 60 à 100." },
+         { v: "decrire", t: "Le cœur de Léa bat à 120 battements par minute au repos." },
+         { v: "deduire", t: "J’en déduis qu’elle a une tachycardie." } ] },
+  { doc: "Une main touche une plaque chaude et se retire aussitôt.", v: "expliquer", task: "comment la main se retire.",
+    o: [ { v: "decrire", t: "La main touche la plaque chaude, puis elle se retire." },
+         { v: "expliquer", t: "Le récepteur de la peau envoie un message à la moelle épinière, qui commande le muscle : donc la main se retire." },
+         { v: "conclure", t: "En conclusion, le réflexe protège le corps." } ] },
+  { doc: "Le fumeur attrape plus d’infections respiratoires que le non-fumeur.", v: "justifier", task: "cette affirmation.",
+    o: [ { v: "justifier", t: "En effet, ses cils détruits n’évacuent plus les microbes piégés dans le mucus." },
+         { v: "decrire", t: "Le fumeur a peu de cils dans les bronches." },
+         { v: "conclure", t: "En conclusion, le tabac est dangereux pour la santé." } ] },
+  { doc: "Le réflexe suit un trajet : récepteur, nerf sensitif, moelle épinière, nerf moteur, muscle.", v: "conclure", task: "à quoi sert le réflexe.",
+    o: [ { v: "conclure", t: "En conclusion, le réflexe permet de réagir très vite pour se protéger." },
+         { v: "decrire", t: "Le message passe par le récepteur, le nerf sensitif, la moelle, le nerf moteur puis le muscle." },
+         { v: "justifier", t: "En effet, le message passe par la moelle épinière sans attendre le cerveau." } ] },
+  { doc: "Coupe de bronche d’un non-fumeur : la paroi est tapissée de nombreux cils, avec très peu de mucus.", v: "decrire", task: "la coupe.",
+    o: [ { v: "decrire", t: "On observe de nombreux cils et très peu de mucus." },
+         { v: "expliquer", t: "Les cils évacuent le mucus, donc il y en a très peu." },
+         { v: "deduire", t: "J’en déduis que ses bronches sont en bonne santé." } ] },
+
+  { doc: "Radiographie du genou d’un patient : l’espace entre le fémur et le tibia est très réduit.", v: "decrire", task: "la radiographie.",
+    o: [ { v: "decrire", t: "On observe que l’espace entre le fémur et le tibia est réduit." },
+         { v: "deduire", t: "J’en déduis que le cartilage de l’articulation est abîmé." },
+         { v: "conclure", t: "En conclusion, le patient souffre d’arthrose." } ] },
+  { doc: "Pendant l’inspiration, de l’air entre dans les poumons.", v: "expliquer", task: "comment l’air entre dans les poumons.",
+    o: [ { v: "expliquer", t: "Le diaphragme se contracte et s’abaisse, donc le volume du thorax augmente et l’air entre dans les poumons." },
+         { v: "decrire", t: "L’air passe par le nez, la trachée, les bronches, puis les alvéoles." },
+         { v: "conclure", t: "En conclusion, l’inspiration est un phénomène actif." } ] },
+  { doc: "Tableau : l’air inspiré contient 21 % de dioxygène et 0,04 % de dioxyde de carbone. L’air expiré en contient 16 % et 4 %.", v: "comparer", task: "l’air inspiré et l’air expiré.",
+    o: [ { v: "comparer", t: "L’air expiré contient moins de dioxygène que l’air inspiré, alors qu’il contient plus de dioxyde de carbone." },
+         { v: "decrire", t: "L’air inspiré contient 21 % de dioxygène et 0,04 % de dioxyde de carbone." },
+         { v: "deduire", t: "J’en déduis que l’organisme consomme du dioxygène et rejette du dioxyde de carbone." } ] },
+  { doc: "L’intestin grêle est l’organe de l’absorption des nutriments.", v: "justifier", task: "cette affirmation.",
+    o: [ { v: "justifier", t: "En effet, sa paroi présente des replis et des villosités qui augmentent la surface d’absorption." },
+         { v: "decrire", t: "Sur la coupe, on observe des replis et de petites projections en forme de doigts." },
+         { v: "conclure", t: "En conclusion, l’intestin grêle absorbe les nutriments." } ] },
+  { doc: "Une artère coronaire du cœur est obstruée par un caillot.", v: "deduire", task: "les conséquences pour le muscle cardiaque.",
+    o: [ { v: "deduire", t: "J’en déduis que la zone du cœur irriguée par cette artère reçoit moins de dioxygène et risque de souffrir." },
+         { v: "decrire", t: "Un caillot bouche une artère coronaire." },
+         { v: "expliquer", t: "Les artères coronaires apportent le sang au muscle cardiaque, donc il dépend d’elles pour recevoir le dioxygène." } ] },
+  { doc: "Trois données : IMC de 32, apports énergétiques supérieurs aux dépenses, peu d’activité physique.", v: "conclure", task: "sur la situation de la personne.",
+    o: [ { v: "conclure", t: "En conclusion, la personne est en situation d’obésité, favorisée par des apports trop élevés et peu d’activité." },
+         { v: "decrire", t: "La personne a un IMC de 32 et pratique peu d’activité physique." },
+         { v: "comparer", t: "Son IMC de 32 est supérieur à la valeur de 30 qui définit l’obésité." } ] },
+  { doc: "Schéma d’un neurone : un corps cellulaire, des dendrites, un long axone entouré d’une gaine.", v: "decrire", task: "le schéma du neurone.",
+    o: [ { v: "decrire", t: "Le neurone possède un corps cellulaire, des dendrites et un long axone entouré d’une gaine." },
+         { v: "expliquer", t: "Le message circule vite le long de l’axone, donc il atteint rapidement le neurone suivant." },
+         { v: "justifier", t: "En effet, le neurone est une cellule spécialisée." } ] },
+  { doc: "Après un repas riche en glucides, la glycémie augmente.", v: "expliquer", task: "pourquoi la glycémie augmente.",
+    o: [ { v: "expliquer", t: "Les glucides sont digérés en glucose, qui est absorbé par l’intestin et passe dans le sang : la glycémie augmente donc." },
+         { v: "decrire", t: "La glycémie passe de 0,8 g/L à 1,4 g/L après le repas." },
+         { v: "deduire", t: "J’en déduis que la glycémie varie avec l’alimentation." } ] },
+  { doc: "Au microscope : la paroi d’une artère est épaisse et élastique, celle d’une veine est mince.", v: "comparer", task: "l’artère et la veine.",
+    o: [ { v: "comparer", t: "L’artère a une paroi épaisse et élastique, alors que la veine a une paroi plus mince." },
+         { v: "decrire", t: "La paroi de l’artère est épaisse et élastique." },
+         { v: "justifier", t: "En effet, l’artère supporte une pression élevée." } ] },
+  { doc: "Le muscle strié squelettique est dit « volontaire ».", v: "justifier", task: "cette affirmation.",
+    o: [ { v: "justifier", t: "En effet, sa contraction est commandée par la volonté, par l’intermédiaire des nerfs moteurs." },
+         { v: "decrire", t: "Sur la coupe, ses fibres présentent des stries claires et sombres." },
+         { v: "deduire", t: "J’en déduis que le muscle se contracte quand le nerf moteur l’active." } ] },
+  { doc: "Spirogramme d’un patient : son volume d’air expiré en 1 seconde est très inférieur à la valeur normale.", v: "deduire", task: "l’état de ses voies respiratoires.",
+    o: [ { v: "deduire", t: "J’en déduis que l’air sort difficilement : ses bronches sont probablement rétrécies." },
+         { v: "decrire", t: "Le volume expiré en 1 seconde est inférieur à la valeur normale." },
+         { v: "comparer", t: "Sa valeur est plus faible que celle d’une personne en bonne santé." } ] },
+  { doc: "Données sur le tabac : la fumée détruit les cils, irrite les bronches et favorise les infections.", v: "conclure", task: "sur les effets du tabac sur les bronches.",
+    o: [ { v: "conclure", t: "En conclusion, le tabac abîme les bronches et favorise les infections respiratoires." },
+         { v: "decrire", t: "La fumée contient du monoxyde de carbone, des goudrons et de la nicotine." },
+         { v: "expliquer", t: "La fumée détruit les cils, donc le mucus n’est plus évacué et s’accumule." } ] },
+  { doc: "Étiquette d’un produit : pour 100 g, 12 g de lipides, 60 g de glucides, 8 g de protéines.", v: "decrire", task: "l’étiquette.",
+    o: [ { v: "decrire", t: "Pour 100 g, le produit contient 12 g de lipides, 60 g de glucides et 8 g de protéines." },
+         { v: "comparer", t: "Il contient plus de glucides que de lipides et de protéines." },
+         { v: "deduire", t: "J’en déduis que c’est un aliment surtout énergétique grâce à ses glucides." } ] },
+  { doc: "Un muscle se raccourcit quand il se contracte.", v: "expliquer", task: "comment le muscle se raccourcit.",
+    o: [ { v: "expliquer", t: "Les filaments d’actine et de myosine glissent les uns sur les autres, donc le sarcomère se raccourcit et le muscle aussi." },
+         { v: "decrire", t: "Le muscle contracté est plus court et plus gros." },
+         { v: "conclure", t: "En conclusion, un muscle contracté se raccourcit." } ] },
+  { doc: "Le sang arrive aux poumons pauvre en dioxygène et en repart riche en dioxygène.", v: "comparer", task: "le sang avant et après son passage dans les poumons.",
+    o: [ { v: "comparer", t: "Avant les poumons, le sang est pauvre en dioxygène ; après les poumons, il en est riche." },
+         { v: "decrire", t: "Le sang passe par les capillaires qui entourent les alvéoles." },
+         { v: "deduire", t: "J’en déduis que le sang s’enrichit en dioxygène dans les poumons." } ] },
+  { doc: "Le tabagisme est un facteur de risque cardio-vasculaire.", v: "justifier", task: "cette affirmation.",
+    o: [ { v: "justifier", t: "En effet, il abîme la paroi des artères et favorise la formation de dépôts qui les bouchent." },
+         { v: "decrire", t: "La fumée contient du monoxyde de carbone, des goudrons et de la nicotine." },
+         { v: "conclure", t: "En conclusion, il faut arrêter de fumer." } ] },
+  { doc: "Après une lésion de la moelle épinière, un patient ne sent plus et ne peut plus bouger ses jambes.", v: "deduire", task: "la nature de l’atteinte.",
+    o: [ { v: "deduire", t: "J’en déduis qu’il s’agit d’une paraplégie : le message nerveux ne passe plus au-dessous de la lésion." },
+         { v: "decrire", t: "Le patient ne sent plus ses jambes et ne peut plus les bouger." },
+         { v: "justifier", t: "En effet, la moelle épinière relie l’encéphale aux nerfs du corps." } ] },
+  { doc: "Un élève mange peu de fruits, boit des sodas et saute le petit-déjeuner.", v: "conclure", task: "sur l’équilibre alimentaire de cet élève.",
+    o: [ { v: "conclure", t: "En conclusion, son alimentation est déséquilibrée : trop de sucres, pas assez de fibres ni de vitamines." },
+         { v: "decrire", t: "Il mange peu de fruits, boit des sodas et saute le petit-déjeuner." },
+         { v: "comparer", t: "Ses apports en sucres sont plus élevés que les apports conseillés." } ] }
+];
+
+/* Mode 3 : fabrique ta phrase (l’ordre du tableau est l’ordre correct) */
+var C = [
+  { v: "decrire", task: "la coupe de bronche du fumeur.", p: ["On observe que", "les cils sont rares et courts", "et qu’il y a beaucoup de mucus."] },
+  { v: "expliquer", task: "pourquoi le fumeur tousse.", p: ["La fumée détruit les cils,", "donc le mucus n’est plus évacué,", "d’où la toux."] },
+  { v: "comparer", task: "la bronche du fumeur et celle du non-fumeur.", p: ["Les deux ont une paroi de bronche,", "mais les cils sont nombreux chez le non-fumeur", "alors qu’ils sont rares chez le fumeur."] },
+  { v: "justifier", task: "que le fumeur est plus exposé aux infections.", p: ["En effet,", "ses cils détruits", "n’évacuent plus les microbes."] },
+  { v: "deduire", task: "l’effet d’un nerf moteur coupé.", p: ["Le nerf moteur est coupé,", "j’en déduis que", "le muscle ne se contractera plus."] },
+  { v: "conclure", task: "sur l’effet du tabac.", p: ["En conclusion,", "le tabac abîme les cils des bronches,", "ce qui favorise la toux et les infections."] },
+
+  { v: "decrire", task: "la radiographie du genou.", p: ["On observe que", "l’espace entre le fémur et le tibia", "est très réduit."] },
+  { v: "decrire", task: "le schéma du cœur.", p: ["Le cœur possède", "quatre cavités :", "deux oreillettes et deux ventricules."] },
+  { v: "decrire", task: "la coupe de l’intestin grêle.", p: ["On observe", "de nombreux replis", "et de petites projections en forme de doigts."] },
+  { v: "expliquer", task: "comment l’air entre dans les poumons.", p: ["Le diaphragme se contracte,", "donc le volume du thorax augmente,", "et l’air entre dans les poumons."] },
+  { v: "expliquer", task: "comment le muscle se contracte.", p: ["Le neurone moteur libère un neurotransmetteur,", "qui déclenche la contraction de la fibre,", "donc le muscle se raccourcit."] },
+  { v: "expliquer", task: "pourquoi la glycémie augmente après un repas.", p: ["Les glucides sont digérés en glucose,", "qui passe dans le sang,", "d’où l’augmentation de la glycémie."] },
+  { v: "comparer", task: "une artère et une veine.", p: ["Les deux sont des vaisseaux sanguins,", "mais l’artère a une paroi épaisse", "alors que la veine a une paroi plus mince."] },
+  { v: "comparer", task: "l’air inspiré et l’air expiré.", p: ["L’air expiré contient moins de dioxygène,", "alors qu’il contient", "plus de dioxyde de carbone."] },
+  { v: "comparer", task: "la radiographie et le scanner.", p: ["La radiographie est rapide et peu coûteuse,", "mais le scanner", "donne des images plus détaillées."] },
+  { v: "justifier", task: "que l’intestin grêle est adapté à l’absorption.", p: ["En effet,", "ses replis et ses villosités", "augmentent la surface d’échange."] },
+  { v: "justifier", task: "que l’alvéole est adaptée aux échanges gazeux.", p: ["En effet,", "sa paroi est très fine,", "ce qui facilite la diffusion des gaz."] },
+  { v: "justifier", task: "que le muscle est un tissu excitable.", p: ["En effet,", "il se contracte", "quand il reçoit un influx nerveux."] },
+  { v: "deduire", task: "l’effet d’une lésion de la moelle épinière.", p: ["Le message nerveux ne passe plus,", "j’en déduis que", "les muscles sous la lésion sont paralysés."] },
+  { v: "deduire", task: "la situation d’une personne dont l’IMC est de 17.", p: ["L’IMC est inférieur à 18,5,", "j’en déduis que", "la personne est en insuffisance pondérale."] },
+  { v: "deduire", task: "l’effet d’une artère coronaire bouchée.", p: ["Une artère coronaire est bouchée,", "j’en déduis que", "le muscle cardiaque reçoit moins de dioxygène."] },
+  { v: "conclure", task: "sur le rôle de l’influx nerveux.", p: ["En conclusion,", "l’influx nerveux est un signal électrique", "qui permet la communication dans l’organisme."] },
+  { v: "conclure", task: "sur l’asthme.", p: ["En conclusion,", "l’asthme rétrécit les bronches", "et gêne le passage de l’air."] },
+  { v: "conclure", task: "sur l’alimentation de l’élève.", p: ["En conclusion,", "son alimentation est déséquilibrée :", "trop de sucres et pas assez de fibres."] }
+];
+
+/* Cartes de révision */
+var CARDS = {
+  decrire:   { d: "Dire ce qu’on observe, en détail, sans expliquer.", q: "Qu’est-ce que je vois ?", w: "on observe, il y a, plus, moins", x: "Sur la coupe du fumeur, il y a peu de cils, et ils sont courts. Il y a beaucoup de mucus." },
+  expliquer: { d: "Développer les étapes pour faire comprendre comment et pourquoi.", q: "Comment ça marche ? Pourquoi ?", w: "parce que, car, donc, d’où", x: "La fumée détruit les cils. Le mucus n’est plus évacué, donc il s’accumule. D’où la toux du fumeur." },
+  comparer:  { d: "Présenter en parallèle les points communs et les différences.", q: "Qu’est-ce qui se ressemble ? Qu’est-ce qui change ?", w: "comme, de même, alors que, en revanche", x: "Les deux coupes montrent une paroi de bronche. Les cils sont nombreux chez le non-fumeur, alors qu’ils sont rares chez le fumeur." },
+  justifier: { d: "Donner des arguments pour une affirmation déjà donnée.", q: "Comment je prouve que c’est vrai ?", w: "car, en effet, la preuve", x: "Le fumeur attrape plus d’infections. En effet, ses cils détruits n’évacuent plus les microbes." },
+  deduire:   { d: "Tirer d’un fait la conséquence logique.", q: "Si c’est vrai, qu’est-ce que ça entraîne ?", w: "donc, j’en déduis que, par conséquent", x: "Les cils évacuent le mucus. Le fumeur n’en a presque plus. J’en déduis que son mucus s’évacue mal." },
+  conclure:  { d: "Donner la réponse finale qui découle de tout ce qui précède.", q: "Au final, que répondre à la question posée ?", w: "en conclusion, ainsi, finalement", x: "En conclusion, le tabac abîme les cils des bronches. Cela gêne l’évacuation du mucus et favorise la toux et les infections." }
+};
+
+/* ================= MOTEUR ================= */
+var LS_KEY = "bonverbe-v2";
+var store = { best: {}, big: 0, log: null, seen: {}, name: "", acc: null, tmode: 0, teach: {} };
+function load() {
+  try {
+    var s = JSON.parse(localStorage.getItem(LS_KEY)) || JSON.parse(localStorage.getItem("bonverbe-v1"));
+    if (s) {
+      store.big = s.big || 0; store.log = s.log || null; store.best = s.best || {}; store.seen = s.seen || {}; store.name = s.name || ""; store.acc = s.acc || null; store.tmode = s.tmode ? 1 : 0; store.teach = s.teach || {};
+      /* anciens identifiants de la première version */
+      [["A", "quel-verbe"], ["B", "bonne-reponse"], ["C", "fabrique-phrase"]].forEach(function (p) {
+        if (store.best[p[0]] != null) { store.best[p[1]] = Math.max(store.best[p[1]] || 0, store.best[p[0]]); delete store.best[p[0]]; }
+      });
+    }
+  } catch (e) {}
+}
+function save() { try { localStorage.setItem(LS_KEY, JSON.stringify(store)); } catch (e) {} }
+function applySize() { document.documentElement.style.setProperty("--fs", [1, 1.2, 1.4][store.big || 0]); }
+
+function shuffle(a) { a = a.slice(); for (var i = a.length - 1; i > 0; i--) { var j = Math.floor(Math.random() * (i + 1)); var t = a[i]; a[i] = a[j]; a[j] = t; } return a; }
+function esc(s) { return String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;"); }
+var $ = function (s) { return document.querySelector(s); };
+function pad(n) { return (n < 10 ? "0" : "") + n; }
+function dayKey(d) { return d.getFullYear() + "-" + pad(d.getMonth() + 1) + "-" + pad(d.getDate()); }
+function fmtDate(iso) { if (!iso) return "–"; var d = new Date(iso); if (isNaN(d)) return "–"; return pad(d.getDate()) + "/" + pad(d.getMonth() + 1) + " " + pad(d.getHours()) + "h" + pad(d.getMinutes()); }
+
+var ICON_SOUND = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9v6h4l5 4V5L8 9H4z"/><path d="M16.5 8.5a5 5 0 0 1 0 7"/><path d="M19 6a8.5 8.5 0 0 1 0 12"/></svg>';
+var STAR = '<svg viewBox="0 0 24 24" aria-hidden="true"><path stroke-width="1.8" stroke-linejoin="round" d="M12 2.8l2.8 5.9 6.4.8-4.7 4.4 1.2 6.4L12 17.2 6.3 20.3l1.2-6.4L2.8 9.5l6.4-.8L12 2.8z"/></svg>';
+function stars(n, cls) { var h = '<div class="' + (cls || "stars") + '" role="img" aria-label="' + n + ' étoile' + (n > 1 ? "s" : "") + ' sur 3">'; for (var i = 0; i < 3; i++) h += STAR.replace("<svg", '<svg class="' + (i < n ? "on" : "off") + '"'); return h + "</div>"; }
+function say(t) { try { speechSynthesis.cancel(); var u = new SpeechSynthesisUtterance(t); u.lang = "fr-FR"; u.rate = 0.9; speechSynthesis.speak(u); } catch (e) {} }
+function listenBtn(text) { return ("speechSynthesis" in window) ? '<button class="listen" data-act="say" data-say="' + encodeURIComponent(text) + '">' + ICON_SOUND + "Écouter</button>" : ""; }
+function chip(k) { return '<span class="chip ' + V[k].c + '">' + V[k].n + "</span>"; }
+
+/* ---------- Registre des jeux ---------- */
+var GAMES = [];
+function registerGame(g) { GAMES = GAMES.filter(function (x) { return x.id !== g.id; }); GAMES.push(g); if (typeof render === "function" && S && S.view === "home") render(); }
+function gameById(id) { return GAMES.filter(function (g) { return g.id === id; })[0]; }
+function gameName(id) { var g = gameById(id); return g ? g.name : id; }
+
+/* ---------- Suivi des connexions ----------
+   Deux journaux de même forme :
+   - LOCAL : sur cet appareil (toujours), sert au « Mon bilan ».
+   - REMOTE : dans la base partagée, un document usage/<id> par personne connectée à Claude
+              avec le droit de contribuer. Lu par le propriétaire dans « Statistiques ». */
+function emptyLog() { return { v: 2, visits: 0, lastVisit: "", days: {}, games: {}, ev: [] }; }
+function normLog(d) { var L = emptyLog(); if (d && typeof d === "object") { L.visits = d.visits || 0; L.lastVisit = d.lastVisit || ""; L.days = d.days || {}; L.games = d.games || {}; L.ev = d.ev || []; } return L; }
+function gstat(L, id) { return L.games[id] || (L.games[id] = { open: 0, done: 0, ok: 0, n: 0, last: "" }); }
+function addEv(L, e) { L.ev.push(e); if (L.ev.length > 300) L.ev = L.ev.slice(-300); }
+function opVisit() { return function (L) {
+  L.visits++; L.lastVisit = new Date().toISOString(); var k = dayKey(new Date()); L.days[k] = (L.days[k] || 0) + 1;
+  var ks = Object.keys(L.days).sort(); while (ks.length > 90) delete L.days[ks.shift()];
+}; }
+function opOpen(id) { return function (L) { var g = gstat(L, id); g.open++; g.last = new Date().toISOString(); addEv(L, { g: id, k: "open", t: g.last }); }; }
+function opDone(id, ok, n) { return function (L) { var g = gstat(L, id); g.done++; g.ok += ok; g.n += n; g.last = new Date().toISOString(); addEv(L, { g: id, k: "done", ok: ok, n: n, t: g.last }); }; }
+
+var LOCAL = emptyLog();
+var REMOTE = null;
+var net = { state: "init", db: null, uid: null, ref: null, admin: false }; /* init | on | off | denied */
+var pend = [];
+var wBusy = false, wDirty = false, wTimer = null, wFail = 0;
+
+function track(op) {
+  if (store.tmode) return; /* les visites de l’enseignant ne sont pas comptées */
+  op(LOCAL); store.log = LOCAL; save();
+  if (net.state === "init") pend.push(op);
+  else if (net.state === "on") { op(REMOTE); touchRemote(); }
+}
+function touchRemote() { if (net.state !== "on") return; wDirty = true; clearTimeout(wTimer); wTimer = setTimeout(flush, 1500); }
+function flush() {
+  if (wBusy || !wDirty || net.state !== "on") return;
+  wBusy = true; wDirty = false;
+  Promise.resolve().then(function () { return net.ref.set(JSON.parse(JSON.stringify(REMOTE))); }).then(function () { wFail = 0; }, function (e) {
+    var c = e && e.code;
+    if (c === "invalid_argument" || c === "revoked" || c === "not_granted" || c === "capability_disabled" || c === "quota_exceeded") net.state = "denied";
+    else if (++wFail < 4) wDirty = true;
+  }).then(function () { wBusy = false; if (wDirty && net.state === "on") touchRemote(); if (S.view === "bilan") render(); });
+}
+document.addEventListener("visibilitychange", function () { if (document.hidden && net.state === "on") { clearTimeout(wTimer); flush(); } });
+
+function withTimeout(p, ms) { return new Promise(function (res, rej) { var t = setTimeout(function () { rej({ code: "timeout" }); }, ms); Promise.resolve(p).then(function (v) { clearTimeout(t); res(v); }, function (e) { clearTimeout(t); rej(e); }); }); }
+function initNet() {
+  var done = function (st) { net.state = st; if (st !== "on") pend = []; if (S.view === "home" || S.view === "bilan") render(); };
+  if (!window.claude || !window.claude.use) return done("off");
+  return Promise.all([window.claude.use("db"), window.claude.use("user")]).then(function (r) {
+    var db = r[0], user = r[1];
+    if (!db || !user) return done("off");
+    return withTimeout(user.id(), 10000).then(function (uid) {
+      if (!uid) return done("off");
+      return Promise.resolve(user.canEdit ? user.canEdit() : false).catch(function () { return false; }).then(function (adm) {
+        net.db = db; net.uid = uid; net.admin = !!adm; net.ref = db.doc("usage/" + uid);
+        return withTimeout(net.ref.get(), 10000).then(function (snap) {
+          REMOTE = normLog(snap.exists ? snap.data() : null);
+          var ops = pend; pend = []; net.state = "on";
+          ops.forEach(function (op) { op(REMOTE); });
+          if (ops.length) touchRemote();
+          done("on");
+        });
+      });
+    });
+  }).catch(function () { done("off"); });
+}
+
+/* ---------- État et vues ---------- */
+var S = { view: "home", prev: "home", g: null, queue: [], i: 0, res: [], q: {}, endInfo: null, usage: null, usageSlow: false };
+var app = $("#app");
+var usageUnsub = null, usageTimer = null;
+
+var E = {
+  esc: esc, chip: chip, shuffle: shuffle, listen: listenBtn, V: V, ORDER: ORDER,
+  render: function () { render(); },
+  finish: function (ok) { S.res.push({ item: S.queue[S.i], ok: ok }); S.q.done = true; },
+  head: function () { return head(); },
+  nextBtn: function () { return nextBtn(); },
+  complete: function (ok, n) {
+    var st = ok === n ? 3 : ok >= n - 1 ? 2 : ok >= Math.ceil(n / 2) ? 1 : 0;
+    var id = S.g.id; if (st > (store.best[id] || 0)) { store.best[id] = st; save(); }
+    track(opDone(id, ok, n)); return st;
+  }
+};
+
+function prog() {
+  var h = '<div class="prog" aria-hidden="true">';
+  for (var i = 0; i < S.queue.length; i++) { var r = S.res[i]; h += '<i class="' + (r ? (r.ok ? "ok" : "ko") : (i === S.i ? "cur" : "")) + '"></i>'; }
+  return h + "</div>";
+}
+function head() { return '<div class="meta"><span>' + esc(S.g.name) + " · " + (S.i + 1) + " sur " + S.queue.length + "</span>" + prog() + "</div>"; }
+function nextBtn() { return '<button class="btn full" data-act="next">' + (S.i + 1 >= S.queue.length ? "Voir mon résultat" : "Question suivante") + "</button>"; }
+
+function hkey(it) { var s = JSON.stringify(it), h = 5381; for (var i = 0; i < s.length; i++) h = ((h * 33) ^ s.charCodeAt(i)) >>> 0; return h.toString(36); }
+/* Tirage sans répétition : on pioche d’abord dans ce qui n’a pas encore été vu ; quand tout est passé, on repart de zéro. */
+function draw(g) {
+  var seen = store.seen[g.id] || [];
+  var fresh = g.pool.filter(function (it) { return seen.indexOf(hkey(it)) < 0; });
+  if (fresh.length < g.n) { seen = []; fresh = g.pool.slice(); }
+  var q = shuffle(fresh).slice(0, g.n);
+  store.seen[g.id] = seen.concat(q.map(hkey)); save();
+  return q;
+}
+function startGame(id, items) {
+  var g = gameById(id); if (!g) return;
+  stopUsage(); S.g = g; track(opOpen(id));
+  if (g.mount) { S.view = "custom"; S.prev = "home"; render(); return; }
+  var q = items || draw(g);
+  if (g.prep) q = g.prep(q);
+  S.queue = q; S.i = 0; S.res = []; S.view = "play"; S.q = g.reset(q[0], E); render();
+}
+
+function viewHome() {
+  var h = "";
+  if (store.tmode) h += '<button class="btn ghost full" data-act="tdash">← Retour à l’espace enseignant</button>';
+  h += "<h1>" + (store.name ? "Salut " + esc(store.name) + " !" : "Le Bon Verbe") + "</h1><p class=\"lead\">Des mini-jeux pour réviser ta méthode et ton vocabulaire médical. Aucun chrono : tu prends ton temps.</p><div class=\"stack\">";
+  var G = visibleGames();
+  if (!G.length) h += "<p class=\"lead\">Aucun jeu pour le moment.</p>";
+  G.forEach(function (g) {
+    h += '<button class="mode" data-act="start" data-game="' + esc(g.id) + '"><div><b>' + esc(g.name) + "</b><span>" + esc(g.desc) + "</span></div>" + stars(store.best[g.id] || 0) + "</button>";
+  });
+  h += '</div><div class="row">';
+  if (can("c")) h += '<button class="btn ghost" data-act="cards">Revoir les cartes</button>';
+  if (typeof PARTS !== "undefined" && can("v")) h += '<button class="btn ghost" data-act="vocab">Le vocabulaire</button>';
+  if (can("b")) h += '<button class="btn ghost" data-act="bilan">Mon bilan</button>';
+  h += "</div>";
+  h += '<p class="foot"><button class="link" data-act="code">J’ai un code</button> · <button class="link" data-act="tlogin">Espace enseignant</button></p>';
+  return h;
+}
+
+function viewEnd() {
+  var I = S.endInfo, st = I.st, ok = I.ok, n = I.n;
+  var msg = st === 3 ? "Série parfaite." : st === 2 ? "Presque parfait : une seule erreur." : st === 1 ? "Bon début. Les verbes ratés reviennent ci-dessous." : "Ce n’est pas grave : c’est comme ça qu’on apprend. Regarde les cartes, puis rejoue.";
+  var h = '<div class="panel center"><p class="label">' + esc(S.g.name) + "</p>" + stars(st, "big-stars") + "<h2>" + ok + " sur " + n + " du premier coup</h2><p class=\"lead\">" + msg + "</p></div>";
+  var missed = S.res.filter(function (r) { return !r.ok; });
+  if (missed.length && S.g.missed) {
+    h += '<p class="label">À revoir</p><ul class="missed">';
+    missed.forEach(function (r) { h += "<li>" + S.g.missed(r.item, E) + "</li>"; });
+    h += "</ul>";
+  }
+  h += '<div class="row">';
+  if (missed.length) h += '<button class="btn" data-act="retry">Rejouer les ratés</button>';
+  h += '<button class="btn' + (missed.length ? " ghost" : "") + '" data-act="again">Nouvelle série</button><button class="btn ghost" data-act="home">Menu</button></div>';
+  return h;
+}
+
+function viewCards() {
+  var h = "<h2>Les 6 cartes</h2><p class=\"lead\">Quand tu hésites, reviens ici. Les exemples parlent du tabac et des bronches.</p>";
+  ORDER.forEach(function (k) {
+    var c = CARDS[k];
+    h += '<div class="rc" style="border-color:var(--' + V[k].c + ')"><h3 class="' + V[k].c + '"><span>' + V[k].n + "</span><small>" + V[k].h + "</small></h3><div>" +
+      "<p><b>" + esc(c.d) + "</b></p><p>Je me demande : « " + esc(c.q) + " »</p><p>Mots utiles : " + esc(c.w) + '</p><p class="ex">' + esc(c.x) + "</p></div></div>";
+  });
+  return h + '<button class="btn full" data-act="back">Retour</button>';
+}
+
+/* ---------- Statistiques ---------- */
+function pct(a, b) { return b ? Math.round(100 * a / b) : 0; }
+function aggUsage(list) {
+  var T = { visits: 0, days: {}, games: {} };
+  list.forEach(function (u) {
+    T.visits += u.visits || 0;
+    Object.keys(u.days || {}).forEach(function (k) { T.days[k] = (T.days[k] || 0) + u.days[k]; });
+    Object.keys(u.games || {}).forEach(function (id) {
+      var g = u.games[id], t = T.games[id] || (T.games[id] = { open: 0, done: 0, ok: 0, n: 0, last: "" });
+      t.open += g.open || 0; t.done += g.done || 0; t.ok += g.ok || 0; t.n += g.n || 0; if ((g.last || "") > t.last) t.last = g.last;
+    });
+  });
+  return T;
+}
+function gameRows(T, withLast) {
+  var ids = GAMES.map(function (g) { return g.id; });
+  Object.keys(T.games).forEach(function (id) { if (ids.indexOf(id) < 0) ids.push(id); });
+  var total = 0; ids.forEach(function (id) { total += (T.games[id] || {}).open || 0; });
+  var h = '<div class="scroll"><table class="tbl"><thead><tr><th>Jeu</th><th class="num">Lancés</th><th class="num">Terminés</th><th>Part</th><th class="num">Réussite</th>' + (withLast ? "<th>Dernière partie</th>" : "") + "</tr></thead><tbody>";
+  ids.forEach(function (id) {
+    var g = T.games[id] || { open: 0, done: 0, ok: 0, n: 0, last: "" }, p = pct(g.open, total);
+    h += "<tr><td>" + esc(gameName(id)) + '</td><td class="num">' + g.open + '</td><td class="num">' + g.done + '</td><td><span class="bar" title="' + p + ' %"><i style="width:' + p + '%"></i></span><small>' + p + ' %</small></td><td class="num">' + (g.n ? pct(g.ok, g.n) + " %" : "–") + "</td>" + (withLast ? "<td>" + fmtDate(g.last) + "</td>" : "") + "</tr>";
+  });
+  return h + "</tbody></table></div>";
+}
+function daysStrip(days) {
+  var out = [], max = 1, now = new Date(), L = ["D", "L", "M", "M", "J", "V", "S"];
+  for (var i = 13; i >= 0; i--) { var d = new Date(now.getFullYear(), now.getMonth(), now.getDate() - i); var k = dayKey(d); var v = days[k] || 0; if (v > max) max = v; out.push({ d: d, v: v }); }
+  var h = '<div class="days" role="img" aria-label="Visites des 14 derniers jours">';
+  out.forEach(function (o) { h += '<div class="' + (o.v ? "" : "zero") + '" title="' + dayKey(o.d) + " : " + o.v + ' visite(s)"><i style="height:' + (o.v ? Math.max(8, Math.round(60 * o.v / max)) : 4) + 'px"></i><span>' + L[o.d.getDay()] + "<br>" + o.d.getDate() + "</span></div>"; });
+  return h + "</div>";
+}
+function stopUsage() { if (usageUnsub) { try { usageUnsub(); } catch (e) {} usageUnsub = null; } clearTimeout(usageTimer); }
+function startUsage() {
+  stopUsage(); S.usage = null; S.usageSlow = false;
+  if (net.state !== "on" || !net.admin) return;
+  usageTimer = setTimeout(function () { S.usageSlow = true; if (S.view === "stats") render(); }, 10000);
+  try {
+    usageUnsub = net.db.collection("usage").onSnapshot(function (snap) {
+      clearTimeout(usageTimer); S.usageSlow = false;
+      S.usage = snap.docs.map(function (d) { var u = d.data() || {}; u.__id = d.id; return u; });
+      if (S.view === "stats") render();
+    }, function () { clearTimeout(usageTimer); S.usage = []; if (S.view === "stats") render(); });
+  } catch (e) { S.usage = []; }
+}
+function viewStats() {
+  var back = '<button class="btn full" data-act="back">Retour</button>';
+  var h = "<h2>Statistiques de connexion</h2>";
+  if (net.state !== "on" || !net.admin) return h + '<p class="lead">Ces statistiques ne sont visibles que pour le propriétaire, connecté à Claude.</p>' + back;
+  if (!S.usage) return h + '<p class="lead">' + (S.usageSlow ? "Les données mettent du temps à arriver. Elles s’afficheront dès que possible." : "Chargement…") + "</p>" + back;
+  var list = S.usage, T = aggUsage(list), games = 0; Object.keys(T.games).forEach(function (k) { games += T.games[k].open; });
+  h += '<p class="lead">Seules les personnes qui ouvrent le jeu connectées à Claude, avec le droit de contribuer, sont comptées ici.</p>';
+  h += '<div class="kpis"><div class="kpi"><b>' + list.length + "</b><span>personne" + (list.length > 1 ? "s" : "") + '</span></div><div class="kpi"><b>' + T.visits + '</b><span>visites</span></div><div class="kpi"><b>' + games + "</b><span>parties lancées</span></div></div>";
+  h += '<p class="label">Par jeu</p><div class="panel">' + gameRows(T, true) + "</div>";
+  h += '<p class="label">Visites des 14 derniers jours</p><div class="panel">' + daysStrip(T.days) + "</div>";
+  if (list.length) {
+    h += '<p class="label">Par personne</p><div class="panel"><div class="scroll"><table class="tbl"><thead><tr><th>Personne</th><th class="num">Visites</th><th class="num">Jours</th><th>Dernière visite</th></tr></thead><tbody>';
+    list.slice().sort(function (a, b) { return (b.lastVisit || "").localeCompare(a.lastVisit || ""); }).forEach(function (u, i) {
+      h += "<tr><td>" + (u.__id === net.uid ? "Toi" : "Visiteur " + (i + 1)) + '</td><td class="num">' + (u.visits || 0) + '</td><td class="num">' + Object.keys(u.days || {}).length + "</td><td>" + fmtDate(u.lastVisit) + "</td></tr>";
+    });
+    h += "</tbody></table></div></div>";
+  }
+  return h + back;
+}
+
+/* ---------- Codes (bilan élève, accès élève) ---------- */
+function enc(o) { return btoa(unescape(encodeURIComponent(JSON.stringify(o)))); }
+function dec(s) { return JSON.parse(decodeURIComponent(escape(atob(s)))); }
+
+/* ---------- Accès élève ---------- */
+function can(k) { if (store.tmode) return true; var a = store.acc; return !a || a[k] !== 0; }
+function visibleGames() {
+  var a = store.acc; if (store.tmode || !a || !a.g) return GAMES;
+  var l = GAMES.filter(function (g) { return a.g.indexOf(g.id) >= 0; });
+  return l.length ? l : GAMES;
+}
+
+/* ---------- Mon bilan (cet appareil) ---------- */
+function bilanCode() {
+  var L = LOCAL, g = {};
+  Object.keys(L.games).forEach(function (id) { var x = L.games[id]; g[id] = [x.open, x.done, x.ok, x.n]; });
+  var ev = L.ev.filter(function (e) { return e.k === "done"; }).slice(-40).map(function (e) { return [e.g, e.ok, e.n, e.t]; });
+  return "BV1." + enc({ n: store.name || "", t: new Date().toISOString(), v: L.visits, dy: Object.keys(L.days).length, last: L.lastVisit, g: g, e: ev });
+}
+function parseBilan(txt) {
+  var m = /BV1\.([A-Za-z0-9+\/=]+)/.exec(txt || ""); if (!m) return null;
+  try { var o = dec(m[1]); return (o && o.g && typeof o.g === "object") ? o : null; } catch (e) { return null; }
+}
+function bilanText() {
+  var L = LOCAL, d = new Date(), t = "Bilan Le Bon Verbe" + (store.name ? " de " + store.name : "") + " du " + pad(d.getDate()) + "/" + pad(d.getMonth() + 1) + "/" + d.getFullYear() + "\n";
+  t += "Visites : " + L.visits + " (sur " + Object.keys(L.days).length + " jour(s))\n";
+  var ids = GAMES.map(function (g) { return g.id; }); Object.keys(L.games).forEach(function (id) { if (ids.indexOf(id) < 0) ids.push(id); });
+  ids.forEach(function (id) { var g = L.games[id] || { open: 0, done: 0, ok: 0, n: 0 }; t += gameName(id) + " : " + g.open + " lancé(s), " + g.done + " terminé(s)" + (g.n ? ", réussite " + pct(g.ok, g.n) + " %" : "") + "\n"; });
+  return t + "\nCode pour mon professeur (à copier en entier) :\n" + bilanCode();
+}
+function viewBilan() {
+  var L = LOCAL, h = "<h2>Mon bilan</h2><p class=\"lead\">Ce que tu as fait sur cet appareil.</p>";
+  h += '<div class="kpis"><div class="kpi"><b>' + L.visits + "</b><span>visites</span></div><div class=\"kpi\"><b>" + Object.keys(L.days).length + "</b><span>jours</span></div><div class=\"kpi\"><b>" + Object.keys(L.games).reduce(function (a, k) { return a + L.games[k].done; }, 0) + "</b><span>séries finies</span></div></div>";
+  h += '<div class="panel">' + gameRows(L, false) + "</div>";
+  h += '<div class="panel"><label class="label" for="nm">Ton prénom</label><input id="nm" class="inp" maxlength="30" autocomplete="off" data-enter="savename" value="' + esc(store.name || "") + '"><button class="btn ghost" data-act="savename">Enregistrer mon prénom</button><p class="msg" id="namemsg"></p></div>';
+  h += '<div class="panel"><p class="lead">' + (net.state === "on" ? "Ton bilan est aussi envoyé à ton professeur." : "Ton bilan reste sur cet appareil. Tu peux le copier pour l’envoyer à ton professeur.") + '</p><button class="btn ghost" data-act="copybilan">Copier mon bilan</button><textarea id="bilantxt" class="bilan" rows="6" readonly hidden></textarea><p class="msg" id="copymsg"></p></div>';
+  return h + '<button class="btn full" data-act="back">Retour</button>';
+}
+
+/* ---------- Code d’accès (côté élève) ---------- */
+function viewCode() {
+  var a = store.acc, h = "<h2>J’ai un code</h2><p class=\"lead\">Ton professeur peut te donner un code. Colle-le ici : ton prénom s’affichera et les jeux prévus pour toi apparaîtront.</p>";
+  if (a) h += '<div class="panel"><p class="lead">Un code est déjà actif' + (store.name ? " pour " + esc(store.name) : "") + ".</p><button class=\"btn ghost\" data-act=\"codeoff\">Retirer mon code</button></div>";
+  h += '<div class="panel"><label class="label" for="cd">Mon code</label><input id="cd" class="inp" autocomplete="off" autocapitalize="off" spellcheck="false" data-enter="codeok" value=""><button class="btn" data-act="codeok">Valider</button><p class="msg" id="cmsg">' + esc(S.cmsg || "") + "</p></div>";
+  return h + '<button class="btn full" data-act="back">Retour</button>';
+}
+
+/* ---------- Espace enseignant ---------- */
+function viewTLogin() {
+  return '<h2>Espace enseignant</h2><p class="lead">Entre ton nom d’utilisateur.</p><div class="panel"><label class="label" for="tu">Nom d’utilisateur</label><input id="tu" class="inp" autocomplete="off" autocapitalize="off" spellcheck="false" data-enter="tsubmit"><button class="btn" data-act="tsubmit">Entrer</button><p class="msg" id="tmsg"></p></div><button class="btn ghost full" data-act="home">Retour</button>';
+}
+function cf() { if (!S.cf) { S.cf = { n: "", g: {}, c: 1, v: 1, b: 1 }; GAMES.forEach(function (g) { S.cf.g[g.id] = 1; }); } return S.cf; }
+function stuList() {
+  var T = store.teach || {};
+  return Object.keys(T).map(function (k) { var r = T[k]; r.__k = k; return r; }).filter(function (r) { return r.snaps && r.snaps.length; }).sort(function (a, b) { return lastSnap(b).t < lastSnap(a).t ? -1 : 1; });
+}
+function lastSnap(r) { return r.snaps.slice().sort(function (a, b) { return a.t < b.t ? -1 : 1; }).pop(); }
+function stuDetail(r) {
+  var snaps = r.snaps.slice().sort(function (a, b) { return a.t < b.t ? -1 : 1; });
+  var last = snaps[snaps.length - 1], prev = snaps.length > 1 ? snaps[snaps.length - 2] : null;
+  var ids = GAMES.map(function (g) { return g.id; }); Object.keys(last.g).forEach(function (id) { if (ids.indexOf(id) < 0) ids.push(id); });
+  var h = '<p class="lead">Visites : ' + last.v + " · " + last.dy + " jour(s) · dernière visite " + fmtDate(last.last) + " · bilan reçu le " + fmtDate(last.t) + ' · ' + snaps.length + " bilan(s) importé(s)</p>";
+  var played = [], never = [];
+  ids.forEach(function (id) { var g = last.g[id]; if (g && g[0] > 0) played.push(id); else never.push(gameName(id)); });
+  if (played.length) {
+    h += '<div class="scroll"><table class="tbl"><thead><tr><th>Jeu</th><th class="num">Séries finies</th><th class="num">Réussite</th><th>Évolution</th><th>Dernières séries</th></tr></thead><tbody>';
+    played.forEach(function (id) {
+      var g = last.g[id], p = g[3] ? pct(g[2], g[3]) : null, pg = prev && prev.g[id] && prev.g[id][3] ? pct(prev.g[id][2], prev.g[id][3]) : null;
+      var ev = "–"; if (p != null && pg != null) { var d = p - pg; ev = d > 0 ? "▲ +" + d + " pts" : d < 0 ? "▼ " + d + " pts" : "="; }
+      var rec = r.ev.filter(function (e) { return e[0] === id; }).slice(-5).map(function (e) { return e[1] + "/" + e[2]; }).join(" → ") || "–";
+      h += "<tr><td>" + esc(gameName(id)) + '</td><td class="num">' + g[1] + '</td><td class="num">' + (p != null ? p + " %" : "–") + "</td><td>" + ev + "</td><td>" + esc(rec) + "</td></tr>";
+    });
+    h += "</tbody></table></div>";
+  } else h += '<p class="lead">Aucun jeu lancé pour le moment.</p>';
+  if (never.length && played.length) h += '<p class="lead">Jamais lancés : ' + esc(never.join(", ")) + ".</p>";
+  h += '<button class="btn ghost" data-act="tdel" data-k="' + esc(r.__k) + '">' + (S.cdel === r.__k ? "Confirmer la suppression" : "Supprimer cet élève") + "</button>";
+  return h;
+}
+function viewTeacher() {
+  var C = cf(), h = '<h2>Espace enseignant</h2><p class="lead">Connecté : DStorm. Tes propres visites ne sont pas comptées.</p>';
+  h += '<div class="panel"><p class="label">Espace élève</p><p class="lead">Mini-jeux, cartes de révision, vocabulaire et bilan, tels que ton élève les voit.</p><button class="btn" data-act="preview">Ouvrir l’espace élève</button></div>';
+  h += '<div class="panel"><p class="label">Code d’accès élève</p><p class="lead">Facultatif. Le code affiche le prénom de l’élève et choisit ce qui lui est proposé. Sans code, elle voit tout.</p>';
+  h += '<label class="label" for="cn">Prénom de l’élève</label><input id="cn" class="inp" maxlength="30" autocomplete="off" data-f="n" value="' + esc(C.n) + '">';
+  GAMES.forEach(function (g) { h += '<label class="chk"><input type="checkbox" data-f="g:' + esc(g.id) + '"' + (C.g[g.id] ? " checked" : "") + "> " + esc(g.name) + "</label>"; });
+  h += '<label class="chk"><input type="checkbox" data-f="c"' + (C.c ? " checked" : "") + "> Cartes de révision</label>";
+  if (typeof PARTS !== "undefined") h += '<label class="chk"><input type="checkbox" data-f="v"' + (C.v ? " checked" : "") + "> Vocabulaire</label>";
+  h += '<label class="chk"><input type="checkbox" data-f="b"' + (C.b ? " checked" : "") + "> Mon bilan</label>";
+  h += '<button class="btn ghost" data-act="mkcode">Créer le code</button><p class="msg" id="cgmsg">' + esc(S.cgmsg || "") + "</p>";
+  if (S.code) h += '<textarea id="codetxt" class="bilan" rows="3" readonly>' + esc(S.code) + '</textarea><button class="btn ghost" data-act="copycode">Copier le code</button><p class="msg" id="ccmsg"></p><p class="lead">Envoie ce code à l’élève : elle le colle dans « J’ai un code », en bas de l’accueil.</p>';
+  h += "</div>";
+  var L = stuList();
+  h += '<div class="panel"><p class="label">Progression des élèves</p><p class="lead">L’élève ouvre « Mon bilan », copie son bilan et te l’envoie. Colle-le ici : ses résultats s’ajoutent à son historique.</p>';
+  h += '<textarea id="imp" class="bilan" rows="4" placeholder="Colle ici le bilan reçu">' + esc(S.impTxt || "") + '</textarea><button class="btn ghost" data-act="timport">Importer ce bilan</button><p class="msg" id="impmsg">' + esc(S.tmsg || "") + "</p>";
+  if (!L.length) h += '<p class="lead">Aucun bilan importé pour le moment.</p>';
+  L.forEach(function (r) { var ls = lastSnap(r); h += '<details class="stu"' + (S.open === r.__k ? " open" : "") + '><summary>' + esc(r.name) + " · dernier bilan " + fmtDate(ls.t) + "</summary>" + stuDetail(r) + "</details>"; });
+  h += "</div>";
+  h += '<div class="panel"><p class="label">Connexions</p>';
+  if (net.state === "on" && net.admin) h += '<p class="lead">Visites et parties lancées des personnes connectées à Claude.</p><button class="btn ghost" data-act="stats">Statistiques de connexion</button>';
+  else h += '<p class="lead">Les statistiques automatiques demandent d’ouvrir cette page connecté à Claude avec ton compte propriétaire. Ici, ce n’est pas le cas : les bilans importés ci-dessus restent ta source principale.</p>';
+  h += "</div>";
+  return h + '<button class="btn ghost full" data-act="tlogout">Se déconnecter</button>';
+}
+function importBilan(txt) {
+  var o = parseBilan(txt);
+  if (!o) return "Je ne trouve pas de code de bilan dans ce texte. Colle le bilan en entier, code compris.";
+  var name = (o.n || "").trim() || "Sans prénom", key = name.toLowerCase();
+  var T = store.teach || (store.teach = {}), r = T[key] || (T[key] = { name: name, snaps: [], ev: [] });
+  if (r.snaps.some(function (s) { return s.t === o.t; })) return "Ce bilan est déjà importé.";
+  r.snaps.push({ t: o.t, v: o.v || 0, dy: o.dy || 0, last: o.last || "", g: o.g });
+  var seen = {}; r.ev.forEach(function (e) { seen[e[0] + "|" + e[3]] = 1; });
+  (o.e || []).forEach(function (e) { if (!seen[e[0] + "|" + e[3]]) r.ev.push(e); });
+  r.ev.sort(function (a, b) { return a[3] < b[3] ? -1 : 1; }); if (r.ev.length > 200) r.ev = r.ev.slice(-200);
+  if (r.snaps.length > 60) r.snaps = r.snaps.slice(-60);
+  save(); S.open = key;
+  return "Bilan de " + name + " importé" + (name === "Sans prénom" ? " (l’élève n’a pas saisi son prénom)." : ".");
+}
+
+function render() {
+  var h, hb = $("#helpbtn");
+  if (hb) { var vv = S.view === "play" && S.g && S.g.help === "vocab"; hb.textContent = vv ? "Vocabulaire" : "Cartes"; hb.setAttribute("data-act", vv ? "vocab" : "cards"); hb.hidden = (["teacher", "tlogin", "code", "stats"].indexOf(S.view) >= 0) || (vv ? !can("v") : !can("c")); }
+  if (S.view === "home") h = viewHome();
+  else if (S.view === "teacher") h = viewTeacher();
+  else if (S.view === "tlogin") h = viewTLogin();
+  else if (S.view === "code") h = viewCode();
+  else if (S.view === "cards") h = viewCards();
+  else if (S.view === "bilan") h = viewBilan();
+  else if (S.view === "vocab") h = viewVocab();
+  else if (S.view === "stats") h = viewStats();
+  else if (S.view === "end") h = viewEnd();
+  else if (S.view === "custom") { app.innerHTML = ""; S.g.mount(app, { E: E, complete: E.complete, home: function () { S.view = "home"; render(); } }); window.scrollTo(0, 0); return; }
+  else h = S.g.view(S.queue[S.i], S.q, E);
+  app.innerHTML = h;
+  window.scrollTo(0, 0);
+}
+
+document.addEventListener("click", function (e) {
+  var b = e.target.closest("[data-act]"); if (!b) return;
+  var a = b.getAttribute("data-act");
+  try { if (a !== "say" && "speechSynthesis" in window) speechSynthesis.cancel(); } catch (x) {}
+  if (a === "say") { say(decodeURIComponent(b.getAttribute("data-say"))); return; }
+  if (a === "size") { store.big = ((store.big || 0) + 1) % 3; save(); applySize(); return; }
+  if (a === "tlogin") { stopUsage(); S.view = store.tmode ? "teacher" : "tlogin"; render(); return; }
+  if (a === "tsubmit") {
+    var u = ($("#tu").value || "").trim().toLowerCase(), tm = $("#tmsg");
+    if (u === "dstorm") { store.tmode = 1; save(); S.view = "teacher"; render(); } else if (tm) tm.textContent = "Nom d’utilisateur inconnu.";
+    return;
+  }
+  if (a === "tlogout") { store.tmode = 0; save(); S.view = "home"; render(); return; }
+  if (a === "tdash") { stopUsage(); S.view = "teacher"; render(); return; }
+  if (a === "preview") { S.view = "home"; render(); return; }
+  if (a === "code") { S.cmsg = ""; S.view = "code"; render(); return; }
+  if (a === "codeoff") { store.acc = null; save(); S.cmsg = "Code retiré."; render(); return; }
+  if (a === "codeok") {
+    var m = /BVA1\.([A-Za-z0-9+\/=]+)/.exec($("#cd").value || ""), o = null;
+    try { o = m ? dec(m[1]) : null; } catch (x) { o = null; }
+    if (!o || typeof o !== "object") { S.cmsg = "Ce code ne marche pas. Vérifie que tu l’as collé en entier."; render(); return; }
+    store.acc = { g: Array.isArray(o.g) ? o.g : null, c: o.c === 0 ? 0 : 1, v: o.v === 0 ? 0 : 1, b: o.b === 0 ? 0 : 1 };
+    if (o.n) store.name = String(o.n).slice(0, 30);
+    save(); S.cmsg = ""; S.view = "home"; render(); return;
+  }
+  if (a === "savename") { var nm = $("#nm"); store.name = (nm.value || "").trim().slice(0, 30); save(); var nmm = $("#namemsg"); if (nmm) nmm.textContent = store.name ? "C’est noté, " + store.name + "." : "Prénom effacé."; return; }
+  if (a === "mkcode") {
+    var C = cf(), cn = $("#cn"); if (cn) C.n = cn.value;
+    var ids = GAMES.filter(function (g) { return C.g[g.id]; }).map(function (g) { return g.id; });
+    if (!ids.length) { S.cgmsg = "Coche au moins un jeu."; S.code = ""; render(); return; }
+    var oo = { n: (C.n || "").trim() }; if (ids.length < GAMES.length) oo.g = ids; if (!C.c) oo.c = 0; if (!C.v) oo.v = 0; if (!C.b) oo.b = 0;
+    S.cgmsg = ""; S.code = "BVA1." + enc(oo); render(); return;
+  }
+  if (a === "copycode") {
+    var ta2 = $("#codetxt"), m2 = $("#ccmsg");
+    var fb = function () { ta2.focus(); ta2.select(); if (m2) m2.textContent = "Copie ce texte."; };
+    try { navigator.clipboard.writeText(S.code).then(function () { if (m2) m2.textContent = "Copié."; }, fb); } catch (x) { fb(); }
+    return;
+  }
+  if (a === "timport") { var im = $("#imp"); S.impTxt = ""; S.tmsg = importBilan(im ? im.value : ""); if (S.tmsg.indexOf("importé") < 0 || S.tmsg.indexOf("déjà") >= 0) S.impTxt = im ? im.value : ""; S.cdel = null; render(); return; }
+  if (a === "tdel") {
+    var k = b.getAttribute("data-k");
+    if (S.cdel === k) { delete store.teach[k]; save(); S.cdel = null; S.open = null; } else { S.cdel = k; S.open = k; }
+    render(); return;
+  }
+  if (a === "cards" || a === "bilan" || a === "stats" || a === "vocab") {
+    if (S.view !== a) { if (S.view !== "cards" && S.view !== "bilan" && S.view !== "stats" && S.view !== "vocab") S.prev = S.view; S.view = a; if (a === "stats") startUsage(); render(); }
+    return;
+  }
+  if (a === "back") { stopUsage(); S.view = (S.prev === "custom" ? "home" : S.prev) || "home"; render(); return; }
+  if (a === "home") { stopUsage(); S.view = "home"; render(); return; }
+  if (a === "start") { startGame(b.getAttribute("data-game")); return; }
+  if (a === "again") { startGame(S.g.id); return; }
+  if (a === "retry") { startGame(S.g.id, S.res.filter(function (r) { return !r.ok; }).map(function (r) { return r.item; })); return; }
+  if (a === "copybilan") {
+    var txt = bilanText(), m = $("#copymsg"), ta = $("#bilantxt");
+    var fallback = function () { ta.value = txt; ta.hidden = false; ta.focus(); ta.select(); if (m) m.textContent = "Copie ce texte et envoie-le."; };
+    try { navigator.clipboard.writeText(txt).then(function () { if (m) m.textContent = "Copié."; }, fallback); } catch (x) { fallback(); }
+    return;
+  }
+  if (a === "next") {
+    S.i++;
+    if (S.i >= S.queue.length) { var n = S.res.length, ok = S.res.filter(function (r) { return r.ok; }).length; S.endInfo = { ok: ok, n: n, st: E.complete(ok, n) }; S.view = "end"; }
+    else S.q = S.g.reset(S.queue[S.i], E);
+    render(); return;
+  }
+  if (S.view === "play" && S.g && S.g.act) S.g.act(a, b, S.queue[S.i], S.q, E);
+});
+
+/* ================= JEUX ================= */
+
+registerGame({
+  id: "quel-verbe", name: "Quel verbe ?", desc: "Je lis une réponse et je trouve le verbe.", n: 5, pool: A,
+  reset: function () { return { done: false, picked: null }; },
+  view: function (it, q, E) {
+    var h = E.head();
+    h += '<div class="panel"><p class="label">Voici une réponse</p><p class="quote">' + E.esc(it.t) + "</p>" + E.listen(it.t) + "</div>";
+    h += '<p class="label">Quel verbe cette réponse attend-elle ?</p><div class="verbs">';
+    E.ORDER.forEach(function (k) {
+      var cls = E.V[k].c + " verb";
+      if (q.done) { if (k === it.v) cls += " right"; else if (k === q.picked) cls += " wrong"; else cls += " dim"; }
+      h += '<button class="' + cls + '" data-act="pickA" data-v="' + k + '"' + (q.done ? " disabled" : "") + "><b>" + E.V[k].n + "</b><small>" + E.V[k].h + "</small></button>";
+    });
+    h += "</div>";
+    if (q.done) {
+      var ok = q.picked === it.v;
+      h += '<div class="fb' + (ok ? "" : " no") + '"><b>' + (ok ? "Oui, c’est « " + E.V[it.v].n + " »." : "Pas tout à fait. C’était « " + E.V[it.v].n + " ».") + "</b><p>" + E.esc(it.clue) + "</p></div>" + E.nextBtn();
+    }
+    return h;
+  },
+  act: function (a, b, it, q, E) {
+    if (a !== "pickA" || q.done) return;
+    var k = b.getAttribute("data-v"); q.picked = k; E.finish(k === it.v); E.render();
+  },
+  missed: function (it, E) { return "<span>" + E.esc(it.t) + "</span><span>" + E.chip(it.v) + "</span>"; }
+});
+
+registerGame({
+  id: "bonne-reponse", name: "La bonne réponse", desc: "Je lis la consigne et je choisis la bonne réponse.", n: 5, pool: B,
+  prep: function (items) { return items.map(function (it) { return { doc: it.doc, v: it.v, task: it.task, o: shuffle(it.o) }; }); },
+  reset: function () { return { done: false, picked: null }; },
+  view: function (it, q, E) {
+    var h = E.head(), speak = "Document : " + it.doc + " Consigne : " + E.V[it.v].n + " " + it.task;
+    it.o.forEach(function (o, i) { speak += " Réponse " + (i + 1) + " : " + o.t; });
+    h += '<div class="panel"><p class="label">Document</p><p class="doc">' + E.esc(it.doc) + '</p><p class="label">Consigne</p><p class="task">' + E.chip(it.v) + " " + E.esc(it.task) + "</p>" + E.listen(speak) + "</div>";
+    h += '<p class="label">Quelle réponse correspond à la consigne ?</p><div class="stack">';
+    it.o.forEach(function (o, i) {
+      var cls = "opt";
+      if (q.done) { if (o.v === it.v) cls += " right"; else if (i === q.picked) cls += " wrong"; }
+      h += '<button class="' + cls + '" data-act="pickB" data-i="' + i + '"' + (q.done ? " disabled" : "") + ">" + E.esc(o.t);
+      if (q.done) h += '<br><span class="tag ' + E.V[o.v].c + '">' + E.V[o.v].n + "</span>";
+      h += "</button>";
+    });
+    h += "</div>";
+    if (q.done) {
+      var ok = it.o[q.picked].v === it.v;
+      h += '<div class="fb' + (ok ? "" : " no") + '"><b>' + (ok ? "Oui." : "Pas tout à fait.") + "</b><p>Pour « " + E.V[it.v].n + " », la bonne réponse est celle qui " + ({ decrire: "dit ce qu’on voit", expliquer: "explique comment et pourquoi", comparer: "met les deux côtés en parallèle", justifier: "donne une preuve", deduire: "tire une conséquence", conclure: "donne le bilan final" })[it.v] + ".</p></div>" + E.nextBtn();
+    }
+    return h;
+  },
+  act: function (a, b, it, q, E) {
+    if (a !== "pickB" || q.done) return;
+    var i = +b.getAttribute("data-i"); q.picked = i; E.finish(it.o[i].v === it.v); E.render();
+  },
+  missed: function (it, E) { return "<span>" + E.chip(it.v) + " " + E.esc(it.task) + "</span><span>" + E.esc(it.o.filter(function (o) { return o.v === it.v; })[0].t) + "</span>"; }
+});
+
+registerGame({
+  id: "fabrique-phrase", name: "Fabrique ta phrase", desc: "Je remets les morceaux dans l’ordre.", n: 4, pool: C,
+  reset: function (it, E) { return { done: false, built: [], mist: 0, pool: E.shuffle(it.p.map(function (t, i) { return { t: t, i: i }; })) }; },
+  view: function (it, q, E) {
+    var h = E.head(), total = it.p.length, full = q.built.length === total;
+    h += '<div class="panel"><p class="label">Consigne</p><p class="task">' + E.chip(it.v) + " " + E.esc(it.task) + "</p>" + E.listen(E.V[it.v].n + " " + it.task) + "</div>";
+    h += '<p class="label">Touche les morceaux dans le bon ordre</p><div class="build' + (full ? " full" : "") + '" id="build">';
+    q.built.forEach(function (i) { h += '<span class="piece ' + E.V[it.v].c + '">' + E.esc(it.p[i]) + "</span>"; });
+    h += "</div>";
+    if (!full) {
+      h += '<div class="pool">';
+      q.pool.forEach(function (p) { h += '<button data-act="pickC" data-i="' + p.i + '"' + (q.built.indexOf(p.i) > -1 ? " disabled" : "") + ">" + E.esc(p.t) + "</button>"; });
+      h += '</div><p class="msg" id="msg">Commence par le début de la phrase.</p>';
+    } else {
+      h += '<div class="fb"><b>' + (q.mist === 0 ? "Phrase réussie du premier coup." : "Phrase complète.") + "</b><p>Retiens le début : « " + E.esc(it.p[0]) + " ».</p></div>" + E.nextBtn();
+    }
+    return h;
+  },
+  act: function (a, b, it, q, E) {
+    if (a !== "pickC" || q.done) return;
+    var idx = +b.getAttribute("data-i");
+    if (idx === q.built.length) {
+      q.built.push(idx);
+      if (q.built.length === it.p.length) E.finish(q.mist === 0);
+      E.render();
+    } else {
+      q.mist++;
+      b.classList.remove("shake"); void b.offsetWidth; b.classList.add("shake");
+      var m = document.getElementById("msg"); if (m) m.textContent = q.built.length === 0 ? "Pas celui-là. Cherche le début de la phrase." : "Pas celui-là. Cherche la suite de la phrase.";
+    }
+  },
+  missed: function (it, E) { return "<span>" + E.chip(it.v) + " " + E.esc(it.task) + "</span><span>" + E.esc(it.p.join(" ")) + "</span>"; }
+});
+
+/* ================= TERMINOLOGIE MÉDICALE ================= */
+/* t : pre (préfixe), rac (racine), suf (suffixe).  m : sens court.  n : nom du sens (suffixes) ; d : complément (racines). */
+var PARTS = [
+  { s: "ite", t: "suf", m: "inflammation", n: "inflammation" },
+  { s: "algie", t: "suf", m: "douleur", n: "douleur" },
+  { s: "pathie", t: "suf", m: "maladie", n: "maladie" },
+  { s: "ectomie", t: "suf", m: "ablation (on enlève)", n: "ablation" },
+  { s: "émie", t: "suf", m: "dans le sang" },
+  { s: "mégalie", t: "suf", m: "augmentation de volume", n: "augmentation de volume" },
+  { s: "plégie", t: "suf", m: "paralysie" },
+  { s: "rragie", t: "suf", m: "saignement", n: "saignement" },
+
+  { s: "bronch", t: "rac", m: "bronches", d: "des bronches" },
+  { s: "pneumo", t: "rac", m: "poumons", d: "des poumons" },
+  { s: "rhin", t: "rac", m: "nez", d: "du nez" },
+  { s: "rhino", t: "rac", m: "nez", d: "du nez" },
+  { s: "traché", t: "rac", m: "trachée", d: "de la trachée" },
+  { s: "my", t: "rac", m: "muscle", d: "du muscle" },
+  { s: "myo", t: "rac", m: "muscle", d: "du muscle" },
+  { s: "arthr", t: "rac", m: "articulation", d: "d’une articulation" },
+  { s: "osté", t: "rac", m: "os", d: "de l’os" },
+  { s: "neuro", t: "rac", m: "nerf", d: "des nerfs" },
+  { s: "cardio", t: "rac", m: "cœur", d: "du cœur" },
+  { s: "gastr", t: "rac", m: "estomac", d: "de l’estomac" },
+  { s: "hépat", t: "rac", m: "foie", d: "du foie" },
+  { s: "hépato", t: "rac", m: "foie", d: "du foie" },
+  { s: "encéphal", t: "rac", m: "encéphale (cerveau)", d: "de l’encéphale" },
+  { s: "méning", t: "rac", m: "méninges", d: "des méninges" },
+  { s: "appendic", t: "rac", m: "appendice", d: "de l’appendice" },
+  { s: "glyc", t: "rac", m: "glucose (sucre)" },
+  { s: "cardie", t: "rac", m: "cœur" },
+  { s: "pnée", t: "rac", m: "respiration" },
+  { s: "orexie", t: "rac", m: "appétit" },
+  { s: "phagie", t: "rac", m: "fait de manger" },
+
+  { s: "hyper", t: "pre", m: "trop" },
+  { s: "hypo", t: "pre", m: "pas assez" },
+  { s: "poly", t: "pre", m: "beaucoup" },
+  { s: "brady", t: "pre", m: "lent" },
+  { s: "tachy", t: "pre", m: "rapide" },
+  { s: "dys", t: "pre", m: "difficulté" },
+  { s: "an", t: "pre", m: "absence" },
+  { s: "hémi", t: "pre", m: "moitié" }
+];
+var PM = {}; PARTS.forEach(function (p) { PM[p.s] = p; });
+var TYPE = { suf: "suffixe", rac: "racine", pre: "préfixe" };
+
+/* Mots : p = morceaux dans l’ordre ; m / d = sens et faux sens écrits à la main (sinon calculés) */
+var WORDS = [
+  { w: "bronchite", p: ["bronch", "ite"] }, { w: "gastralgie", p: ["gastr", "algie"] }, { w: "hépatite", p: ["hépat", "ite"] },
+  { w: "myalgie", p: ["my", "algie"] }, { w: "myopathie", p: ["myo", "pathie"] }, { w: "arthrite", p: ["arthr", "ite"] },
+  { w: "ostéalgie", p: ["osté", "algie"] }, { w: "neuropathie", p: ["neuro", "pathie"] }, { w: "cardiopathie", p: ["cardio", "pathie"] },
+  { w: "cardiomégalie", p: ["cardio", "mégalie"] }, { w: "hépatomégalie", p: ["hépato", "mégalie"] }, { w: "pneumopathie", p: ["pneumo", "pathie"] },
+  { w: "rhinite", p: ["rhin", "ite"] }, { w: "trachéite", p: ["traché", "ite"] }, { w: "rhinorragie", p: ["rhino", "rragie"] },
+  { w: "encéphalite", p: ["encéphal", "ite"] }, { w: "méningite", p: ["méning", "ite"] }, { w: "appendicectomie", p: ["appendic", "ectomie"] },
+  { w: "hyperglycémie", p: ["hyper", "glyc", "émie"], m: "trop de glucose dans le sang", d: ["pas assez de glucose dans le sang", "trop de graisse dans le sang"] },
+  { w: "hypoglycémie", p: ["hypo", "glyc", "émie"], m: "pas assez de glucose dans le sang", d: ["trop de glucose dans le sang", "pas assez de sang dans le corps"] },
+  { w: "tachycardie", p: ["tachy", "cardie"], m: "battements du cœur trop rapides", d: ["battements du cœur trop lents", "douleur du cœur"] },
+  { w: "bradycardie", p: ["brady", "cardie"], m: "battements du cœur trop lents", d: ["battements du cœur trop rapides", "maladie du cœur"] },
+  { w: "dyspnée", p: ["dys", "pnée"], m: "difficulté à respirer", d: ["absence de respiration", "respiration trop rapide"] },
+  { w: "anorexie", p: ["an", "orexie"], m: "absence d’appétit", d: ["manger beaucoup", "douleur de l’estomac"] },
+  { w: "polyphagie", p: ["poly", "phagie"], m: "manger beaucoup", d: ["absence d’appétit", "douleur en mangeant"] },
+  { w: "hémiplégie", p: ["hémi", "plégie"], m: "paralysie d’une moitié du corps", d: ["paralysie de tout le corps", "douleur d’une moitié du corps"] }
+];
+var SUF_N = ["ite", "algie", "pathie", "mégalie", "rragie", "ectomie"];
+function wordMeaning(w) { return w.m || (PM[w.p[1]].n + " " + PM[w.p[0]].d); }
+function wordFakes(w) {
+  if (w.d) return w.d;
+  var suf = w.p[1], rac = w.p[0], out = [];
+  var otherSuf = shuffle(SUF_N.filter(function (s) { return s !== suf; }))[0];
+  out.push(PM[otherSuf].n + " " + PM[rac].d);
+  var racs = WORDS.filter(function (x) { return !x.m && x.p[0] !== rac && PM[x.p[0]].d !== PM[rac].d; }).map(function (x) { return x.p[0]; });
+  out.push(PM[suf].n + " " + PM[shuffle(racs)[0]].d);
+  return out;
+}
+function splitHtml(w) {
+  var h = '<div class="parts">';
+  w.p.forEach(function (s) { h += '<div><span class="pc ' + PM[s].t + '">' + esc(s) + "</span> <span>" + TYPE[PM[s].t] + " : <b>" + esc(PM[s].m) + "</b></span></div>"; });
+  return h + "</div>";
+}
+function wordChips(w) { var h = '<span class="wordline">'; w.p.forEach(function (s) { h += '<span class="pc ' + PM[s].t + '">' + esc(s) + "</span>"; }); return h + "</span>"; }
+
+/* Fiche vocabulaire (vue « Vocabulaire ») */
+function viewVocab() {
+  var h = "<h2>Le vocabulaire</h2><p class=\"lead\">Un mot médical se découpe : préfixe, racine, suffixe. Je lis la fin, puis le début.</p>";
+  [["suf", "Les suffixes : ce qui se passe"], ["rac", "Les racines : où ça se passe"], ["pre", "Les préfixes : le plus ou le moins"]].forEach(function (g) {
+    var groups = [], seen = {};
+    PARTS.filter(function (p) { return p.t === g[0]; }).forEach(function (p) { if (seen[p.m] == null) { seen[p.m] = groups.length; groups.push({ m: p.m, f: [] }); } groups[seen[p.m]].f.push(p.s); });
+    h += '<div class="rc" style="border-color:var(--' + g[0] + ')"><h3 class="' + g[0] + '"><span>' + g[1] + "</span></h3><div>";
+    groups.forEach(function (x) { h += "<p><b>" + esc(x.f.join(" / ")) + "</b> : " + esc(x.m) + "</p>"; });
+    h += "</div></div>";
+  });
+  return h + '<button class="btn full" data-act="back">Retour</button>';
+}
+
+/* Jeu 4 : que veut dire ce mot ? */
+registerGame({
+  id: "sens-du-mot", name: "Que veut dire ce mot ?", desc: "Je lis un mot médical et je trouve son sens.", n: 5, pool: WORDS, help: "vocab",
+  prep: function (items) { return items.map(function (w) { var m = wordMeaning(w), o = [{ t: m, ok: true }]; wordFakes(w).forEach(function (f) { o.push({ t: f, ok: false }); }); return { w: w, o: shuffle(o) }; }); },
+  reset: function () { return { done: false, picked: null }; },
+  view: function (it, q, E) {
+    var h = E.head(), speak = "Que veut dire " + it.w.w + " ?";
+    it.o.forEach(function (o, i) { speak += " Réponse " + (i + 1) + " : " + o.t; });
+    h += '<div class="panel center"><p class="label">Que veut dire ce mot ?</p><p class="bigword">' + (q.done ? wordChips(it.w) : E.esc(it.w.w)) + "</p>" + E.listen(speak) + "</div><div class=\"stack\">";
+    it.o.forEach(function (o, i) {
+      var cls = "opt"; if (q.done) { if (o.ok) cls += " right"; else if (i === q.picked) cls += " wrong"; }
+      h += '<button class="' + cls + '" data-act="pickS" data-i="' + i + '"' + (q.done ? " disabled" : "") + ">" + E.esc(o.t) + "</button>";
+    });
+    h += "</div>";
+    if (q.done) { var ok = it.o[q.picked].ok; h += '<div class="fb' + (ok ? "" : " no") + '"><b>' + (ok ? "Oui." : "Pas tout à fait.") + " « " + E.esc(it.w.w) + " » : " + E.esc(wordMeaning(it.w)) + ".</b>" + splitHtml(it.w) + "</div>" + E.nextBtn(); }
+    return h;
+  },
+  act: function (a, b, it, q, E) { if (a !== "pickS" || q.done) return; var i = +b.getAttribute("data-i"); q.picked = i; E.finish(it.o[i].ok); E.render(); },
+  missed: function (it, E) { return "<span><b>" + E.esc(it.w.w) + "</b></span><span>" + E.esc(wordMeaning(it.w)) + "</span>"; }
+});
+
+/* Jeu 5 : fabrique le mot */
+registerGame({
+  id: "fabrique-mot", name: "Fabrique le mot", desc: "Je construis le mot à partir de son sens.", n: 4, pool: WORDS, help: "vocab",
+  prep: function (items) { return items.map(function (w) { return { w: w, m: wordMeaning(w) }; }); },
+  reset: function (it, E) {
+    var types = it.w.p.map(function (s) { return PM[s].t; });
+    var extra = [];
+    types.forEach(function (t) {
+      var c = E.shuffle(PARTS.filter(function (p) { return p.t === t && it.w.p.indexOf(p.s) < 0 && PM[p.s].m !== PM[it.w.p[types.indexOf(t)]].m && extra.indexOf(p.s) < 0; }))[0];
+      if (c && extra.length < 2) extra.push(c.s);
+    });
+    var all = it.w.p.concat(extra); var pool = E.shuffle(all.map(function (s, i) { return { t: s, id: i }; }));
+    return { done: false, built: [], mist: 0, pool: pool };
+  },
+  view: function (it, q, E) {
+    var h = E.head(), full = q.built.length === it.w.p.length;
+    h += '<div class="panel"><p class="label">Fabrique le mot qui veut dire</p><p class="task"><b>« ' + E.esc(it.m) + " »</b></p><p class=\"lead\">" + it.w.p.length + " morceaux, dans l’ordre.</p>" + E.listen("Fabrique le mot qui veut dire : " + it.m) + "</div>";
+    h += '<div class="build' + (full ? " full" : "") + '">';
+    q.built.forEach(function (pid) { var s = q.pool.filter(function (p) { return p.id === pid; })[0].t; h += '<span class="pc big ' + PM[s].t + '">' + E.esc(s) + "</span>"; });
+    h += "</div>";
+    if (!full) {
+      h += '<div class="pool">';
+      q.pool.forEach(function (p) { h += '<button data-act="pickM" data-id="' + p.id + '"' + (q.built.indexOf(p.id) > -1 ? " disabled" : "") + ">" + E.esc(p.t) + "</button>"; });
+      h += '</div><p class="msg" id="msg">Commence par le début du mot.</p>';
+    } else {
+      h += '<div class="fb"><b>' + (q.mist === 0 ? "Mot réussi du premier coup : " : "Mot complet : ") + E.esc(it.w.w) + "</b>" + splitHtml(it.w) + "</div>" + E.nextBtn();
+    }
+    return h;
+  },
+  act: function (a, b, it, q, E) {
+    if (a !== "pickM" || q.done) return;
+    var id = +b.getAttribute("data-id"), s = q.pool.filter(function (p) { return p.id === id; })[0].t;
+    if (s === it.w.p[q.built.length]) {
+      q.built.push(id);
+      if (q.built.length === it.w.p.length) E.finish(q.mist === 0);
+      E.render();
+    } else {
+      q.mist++; b.classList.remove("shake"); void b.offsetWidth; b.classList.add("shake");
+      var m = document.getElementById("msg"); if (m) m.textContent = q.built.length === 0 ? "Pas celui-là. Quel morceau vient en premier ?" : "Pas celui-là. Cherche le morceau suivant.";
+    }
+  },
+  missed: function (it, E) { return "<span>« " + E.esc(it.m) + " »</span><span><b>" + E.esc(it.w.w) + "</b></span>"; }
+});
+
+/* Jeu 6 : le bon morceau */
+registerGame({
+  id: "bon-morceau", name: "Le bon morceau", desc: "Je trouve le sens d’un préfixe, d’une racine ou d’un suffixe.", n: 6, help: "vocab",
+  pool: (function () { var l = []; WORDS.forEach(function (w) { w.p.forEach(function (s, i) { l.push({ w: w, i: i }); }); }); return l; })(),
+  prep: function (items) {
+    return items.map(function (it) {
+      var s = it.w.p[it.i], part = PM[s], c = [{ t: part.m, ok: true }], used = {}; used[part.m] = 1;
+      shuffle(PARTS.filter(function (p) { return p.t === part.t && !used[p.m]; })).forEach(function (p) { if (c.length < 3 && !used[p.m]) { used[p.m] = 1; c.push({ t: p.m, ok: false }); } });
+      return { w: it.w, s: s, part: part, o: shuffle(c) };
+    });
+  },
+  reset: function () { return { done: false, picked: null }; },
+  view: function (it, q, E) {
+    var h = E.head(), speak = "Dans " + it.w.w + ", que veut dire " + it.s + " ?";
+    it.o.forEach(function (o, i) { speak += " Réponse " + (i + 1) + " : " + o.t; });
+    var word = '<span class="wordline">' + it.w.p.map(function (x) { return '<span class="pc ' + (x === it.s ? PM[x].t : "plain") + '">' + E.esc(x) + "</span>"; }).join("") + "</span>";
+    h += '<div class="panel center"><p class="label">Dans le mot</p><p class="bigword">' + word + '</p><p class="task">Que veut dire « <b>' + E.esc(it.s) + "</b> » ?</p>" + E.listen(speak) + "</div><div class=\"stack\">";
+    it.o.forEach(function (o, i) {
+      var cls = "opt"; if (q.done) { if (o.ok) cls += " right"; else if (i === q.picked) cls += " wrong"; }
+      h += '<button class="' + cls + '" data-act="pickP" data-i="' + i + '"' + (q.done ? " disabled" : "") + ">" + E.esc(o.t) + "</button>";
+    });
+    h += "</div>";
+    if (q.done) { var ok = it.o[q.picked].ok; h += '<div class="fb' + (ok ? "" : " no") + '"><b>' + (ok ? "Oui." : "Pas tout à fait.") + " « " + E.esc(it.s) + " » est un " + TYPE[it.part.t] + " : " + E.esc(it.part.m) + ".</b>" + splitHtml(it.w) + "</div>" + E.nextBtn(); }
+    return h;
+  },
+  act: function (a, b, it, q, E) { if (a !== "pickP" || q.done) return; var i = +b.getAttribute("data-i"); q.picked = i; E.finish(it.o[i].ok); E.render(); },
+  missed: function (it, E) { return "<span><b>" + E.esc(it.s) + "</b> (dans " + E.esc(it.w.w) + ")</span><span>" + E.esc(it.part.m) + "</span>"; }
+});
+
+/* ===== AJOUTER UN JEU : insérer un nouveau registerGame({...}) juste au-dessus de cette ligne =====
+   Jeu à questions : { id, name, desc, n, pool, prep?, reset(it,E), view(it,q,E), act(a,btn,it,q,E), missed(it,E) }
+     view renvoie du HTML ; les boutons portent data-act="..." ; act appelle E.finish(ok) puis E.render().
+   Jeu libre : { id, name, desc, mount(root, { E, complete(ok,n), home() }) } ; il appelle complete(ok,n) à la fin.
+   Le menu, les étoiles et les statistiques de connexion prennent le nouveau jeu en compte tout seuls. */
+/* GAMES-END */
+
+function onField(e) {
+  var t = e.target, f = t && t.getAttribute && t.getAttribute("data-f"); if (!f) return;
+  var C = cf(); if (f === "n") C.n = t.value; else if (f.indexOf("g:") === 0) C.g[f.slice(2)] = t.checked ? 1 : 0; else C[f] = t.checked ? 1 : 0;
+}
+document.addEventListener("input", onField); document.addEventListener("change", onField);
+document.addEventListener("keydown", function (e) {
+  if (e.key !== "Enter") return; var t = e.target, d = t && t.getAttribute && t.getAttribute("data-enter"); if (!d) return;
+  var btn = document.querySelector('[data-act="' + d + '"]'); if (btn) { e.preventDefault(); btn.click(); }
+});
+
+load(); LOCAL = normLog(store.log); applySize(); if (store.tmode) S.view = "teacher"; render();
+track(opVisit());
+initNet();
+</script>
+
+</body></html>
