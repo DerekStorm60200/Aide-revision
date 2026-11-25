@@ -1,4 +1,10 @@
 {
  "v": 1,
- "users": []
+ "users": [
+  {
+   "u": "clementine1",
+   "h": "b1fad0d2c401bc32c4d34dcae2985e3536b87df5265b203b8cfafa50cf413619",
+   "n": "Clémentine"
+  }
+ ]
 }
