@@ -164,6 +164,15 @@ h2 { font-size: 1.35rem; line-height: 1.3; margin: 0; font-weight: 600; text-wra
 .chk { display: flex; gap: 10px; align-items: center; min-height: 44px; }
 .chk input { width: 22px; height: 22px; flex: none; }
 details.stu { border: 1.5px solid var(--line); border-radius: 14px; padding: 10px 12px; background: var(--bg); display: flex; flex-direction: column; gap: 10px; }
+.acc { display: flex; align-items: center; gap: 10px; border: 1.5px solid var(--line); border-radius: 14px; padding: 10px 12px; background: var(--bg); }
+.acc.off { opacity: .6; }
+.acc .who { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.acc .who span { font-size: .8rem; color: var(--muted); overflow-wrap: anywhere; }
+.ico { flex: none; min-width: 44px; height: 44px; border-radius: 12px; border: 2px solid var(--line); background: var(--surface); color: var(--fg); display: inline-flex; align-items: center; justify-content: center; padding: 0 10px; font: inherit; font-weight: 600; cursor: pointer; }
+.ico svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.ico.sure { background: #b3261e; border-color: #b3261e; color: #fff; }
+.warn { border: 2px solid var(--suf, #d97706); border-radius: 14px; padding: 12px; display: flex; flex-direction: column; gap: 10px; }
+.warn p { margin: 0; font-size: .9rem; }
 details.stu summary { cursor: pointer; font-weight: 600; min-height: 32px; }
 </style>
 
@@ -405,12 +414,12 @@ var CARDS = {
 
 /* ================= MOTEUR ================= */
 var LS_KEY = "bonverbe-v2";
-var store = { best: {}, big: 0, log: null, seen: {}, name: "", acc: null, tmode: 0, teach: {} };
+var store = { best: {}, big: 0, log: null, seen: {}, name: "", acc: null, tmode: 0, teach: {}, reg: null, plain: {} };
 function load() {
   try {
     var s = JSON.parse(localStorage.getItem(LS_KEY)) || JSON.parse(localStorage.getItem("bonverbe-v1"));
     if (s) {
-      store.big = s.big || 0; store.log = s.log || null; store.best = s.best || {}; store.seen = s.seen || {}; store.name = s.name || ""; store.acc = s.acc || null; store.tmode = s.tmode ? 1 : 0; store.teach = s.teach || {};
+      store.big = s.big || 0; store.log = s.log || null; store.best = s.best || {}; store.seen = s.seen || {}; store.name = s.name || ""; store.acc = s.acc || null; store.tmode = s.tmode ? 1 : 0; store.teach = s.teach || {}; store.reg = s.reg || null; store.plain = s.plain || {};
       /* anciens identifiants de la première version */
       [["A", "quel-verbe"], ["B", "bonne-reponse"], ["C", "fabrique-phrase"]].forEach(function (p) {
         if (store.best[p[0]] != null) { store.best[p[1]] = Math.max(store.best[p[1]] || 0, store.best[p[0]]); delete store.best[p[0]]; }
@@ -563,7 +572,7 @@ function viewHome() {
   if (typeof PARTS !== "undefined" && can("v")) h += '<button class="btn ghost" data-act="vocab">Le vocabulaire</button>';
   if (can("b")) h += '<button class="btn ghost" data-act="bilan">Mon bilan</button>';
   h += "</div>";
-  h += '<p class="foot"><button class="link" data-act="code">Mon code</button> · <button class="link" data-act="tlogin">Espace enseignant</button></p>';
+  h += '<p class="foot"><button class="link" data-act="code">Mon compte</button> · <button class="link" data-act="tlogin">Espace enseignant</button></p>';
   return h;
 }
 
@@ -659,13 +668,6 @@ function viewStats() {
 }
 
 /* ---------- Codes (bilan élève, accès élève) ---------- */
-var SALT = "cpj-2026-st2s";
-function sign(p) { var s = p + "|" + SALT, h = 5381, h2 = 52711; for (var i = 0; i < s.length; i++) { var c = s.charCodeAt(i); h = ((h * 33) ^ c) >>> 0; h2 = ((h2 * 31) + c * 7) >>> 0; } return h.toString(36) + h2.toString(36); }
-function readCode(txt) {
-  var m = /BVA2\.([A-Za-z0-9+\/=]+)\.([a-z0-9]+)/.exec(txt || ""); if (!m || sign(m[1]) !== m[2]) return null;
-  try { var o = dec(m[1]); return (o && typeof o === "object") ? o : null; } catch (e) { return null; }
-}
-function gated() { return !store.tmode && !store.acc; }
 function enc(o) { return btoa(unescape(encodeURIComponent(JSON.stringify(o)))); }
 function dec(s) { return JSON.parse(decodeURIComponent(escape(atob(s)))); }
 
@@ -682,7 +684,7 @@ function bilanCode() {
   var L = LOCAL, g = {};
   Object.keys(L.games).forEach(function (id) { var x = L.games[id]; g[id] = [x.open, x.done, x.ok, x.n]; });
   var ev = L.ev.filter(function (e) { return e.k === "done"; }).slice(-40).map(function (e) { return [e.g, e.ok, e.n, e.t]; });
-  return "BV1." + enc({ n: store.name || "", t: new Date().toISOString(), v: L.visits, dy: Object.keys(L.days).length, last: L.lastVisit, g: g, e: ev });
+  return "BV1." + enc({ u: store.acc ? store.acc.u : "", n: store.name || "", t: new Date().toISOString(), v: L.visits, dy: Object.keys(L.days).length, last: L.lastVisit, g: g, e: ev });
 }
 function parseBilan(txt) {
   var m = /BV1\.([A-Za-z0-9+\/=]+)/.exec(txt || ""); if (!m) return null;
@@ -705,13 +707,107 @@ function viewBilan() {
 }
 
 /* ---------- Code d’accès (côté élève) ---------- */
+/* ---------- Registre des accès (acces.json) ---------- */
+function sha256(ascii) {
+  function rr(v, a) { return (v >>> a) | (v << (32 - a)); }
+  var mp = Math.pow, mw = mp(2, 32), i, j, result = "", words = [], abl = ascii.length * 8, hash = [], k = [], pc = 0, isC = {};
+  for (var cand = 2; pc < 64; cand++) {
+    if (!isC[cand]) { for (i = 0; i < 313; i += cand) isC[i] = cand; hash[pc] = (mp(cand, .5) * mw) | 0; k[pc++] = (mp(cand, 1 / 3) * mw) | 0; }
+  }
+  ascii += "\x80"; while (ascii.length % 64 - 56) ascii += "\x00";
+  for (i = 0; i < ascii.length; i++) { j = ascii.charCodeAt(i); words[i >> 2] |= j << ((3 - i) % 4) * 8; }
+  words[words.length] = ((abl / mw) | 0); words[words.length] = abl;
+  for (j = 0; j < words.length;) {
+    var w = words.slice(j, j += 16), old = hash; hash = hash.slice(0, 8);
+    for (i = 0; i < 64; i++) {
+      var w15 = w[i - 15], w2 = w[i - 2], a = hash[0], e = hash[4];
+      var t1 = hash[7] + (rr(e, 6) ^ rr(e, 11) ^ rr(e, 25)) + ((e & hash[5]) ^ ((~e) & hash[6])) + k[i] + (w[i] = (i < 16) ? w[i] : (w[i - 16] + (rr(w15, 7) ^ rr(w15, 18) ^ (w15 >>> 3)) + w[i - 7] + (rr(w2, 17) ^ rr(w2, 19) ^ (w2 >>> 10))) | 0);
+      var t2 = (rr(a, 2) ^ rr(a, 13) ^ rr(a, 22)) + ((a & hash[1]) ^ (a & hash[2]) ^ (hash[1] & hash[2]));
+      hash = [(t1 + t2) | 0].concat(hash); hash[4] = (hash[4] + t1) | 0;
+    }
+    for (i = 0; i < 8; i++) hash[i] = (hash[i] + old[i]) | 0;
+  }
+  for (i = 0; i < 8; i++) for (j = 3; j + 1; j--) { var b = (hash[i] >> (j * 8)) & 255; result += ((b < 16) ? 0 : "") + b.toString(16); }
+  return result;
+}
+var SALT = "cpj-2026-st2s";
+function norm(x) { return String(x || "").trim().toLowerCase(); }
+function hashCode(u, k) { return sha256(unescape(encodeURIComponent(norm(u) + "|" + norm(k) + "|" + SALT))); }
+function gated() { return !store.tmode && !store.acc; }
+
+var REG = { state: "loading", users: [] }; /* liste publiée : loading | ok | fail */
+function findUser(u, h) { return REG.users.filter(function (e) { return e.u === norm(u) && !e.r && e.h === h; })[0]; }
+function loadReg() {
+  REG.state = "loading";
+  return fetch("acces.json?t=" + Date.now(), { cache: "no-store" }).then(function (r) { if (!r.ok) throw 0; return r.json(); }).then(function (j) {
+    REG.users = (j && Array.isArray(j.users)) ? j.users : []; REG.state = "ok";
+  }).catch(function () { REG.state = "fail"; }).then(function () {
+    var had = !!store.acc; checkAcc();
+    if (had && !store.acc) S.view = store.tmode ? S.view : "code";
+    if (["code", "teacher", "home"].indexOf(S.view) >= 0) render();
+  });
+}
+/* À chaque ouverture : l’accès d’un élève n’est valable que s’il figure encore dans la liste publiée. */
+function checkAcc() {
+  if (!store.acc || REG.state !== "ok") return;
+  var e = findUser(store.acc.u, store.acc.h);
+  if (!e) { store.acc = null; save(); return; }
+  store.acc.g = Array.isArray(e.g) ? e.g : null; store.acc.c = e.c === 0 ? 0 : 1; store.acc.v = e.v === 0 ? 0 : 1; store.acc.b = e.b === 0 ? 0 : 1;
+  if (e.n) store.name = e.n; save();
+}
+function draftUsers() { return store.reg ? store.reg.users : REG.users; }
+function draft() { if (!store.reg) store.reg = { users: JSON.parse(JSON.stringify(REG.users)) }; return store.reg; }
+function dirty() { return !!store.reg && (REG.state !== "ok" || JSON.stringify(store.reg.users) !== JSON.stringify(REG.users)); }
+function regJSON() { return JSON.stringify({ v: 1, users: draftUsers() }, null, 1); }
+function tryLogin(u, k) {
+  var h = hashCode(u, k), e = findUser(u, h);
+  if (!e) { S.cmsg = "Nom d’utilisateur ou code incorrect."; render(); return; }
+  store.acc = { u: e.u, h: h, g: Array.isArray(e.g) ? e.g : null, c: e.c === 0 ? 0 : 1, v: e.v === 0 ? 0 : 1, b: e.b === 0 ? 0 : 1 };
+  store.name = e.n || ""; save(); S.cmsg = ""; S.lu = ""; S.view = "home"; render();
+}
+var ICO_REVOKE = '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M5.6 5.6l12.8 12.8"/></svg>';
+var ICO_RESTORE = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12a8 8 0 1 0 2.6-5.9"/><path d="M4 4v5h5"/></svg>';
+
 function viewCode() {
   var g = gated(), h;
-  if (g) h = "<h1>Cours Particuliers avec Jérémy</h1><p class=\"lead\">Entre le code d’accès que ton professeur t’a donné.</p>";
-  else h = "<h2>Mon code</h2><p class=\"lead\">Un code d’accès est déjà actif" + (store.name ? " pour " + esc(store.name) : "") + ".</p><div class=\"panel\"><button class=\"btn ghost\" data-act=\"codeoff\">Retirer mon code</button></div>";
-  h += '<div class="panel"><label class="label" for="cd">Mon code d’accès</label><input id="cd" class="inp" autocomplete="off" autocapitalize="off" spellcheck="false" data-enter="codeok" value=""><button class="btn" data-act="codeok">Valider</button><p class="msg" id="cmsg">' + esc(S.cmsg || "") + "</p></div>";
-  if (g) return h + '<p class="foot"><button class="link" data-act="tlogin">Espace enseignant</button></p>';
+  if (g) h = "<h1>Cours Particuliers avec Jérémy</h1><p class=\"lead\">Entre ton nom d’utilisateur et ton code d’accès.</p>";
+  else h = "<h2>Mon compte</h2><p class=\"lead\">Connecté" + (store.name ? " : " + esc(store.name) : "") + ".</p><div class=\"panel\"><button class=\"btn ghost\" data-act=\"codeoff\">Me déconnecter</button></div>";
+  if (g) {
+    h += '<div class="panel"><label class="label" for="lu">Nom d’utilisateur</label><input id="lu" class="inp" autocomplete="username" autocapitalize="off" spellcheck="false" data-enter="codeok" value="' + esc(S.lu || "") + '">';
+    h += '<label class="label" for="cd">Code d’accès</label><input id="cd" class="inp" type="password" autocomplete="current-password" autocapitalize="off" spellcheck="false" data-enter="codeok" value="">';
+    h += '<button class="btn" data-act="codeok">Entrer</button><p class="msg" id="cmsg">' + esc(S.cmsg || "") + "</p></div>";
+    return h + '<p class="foot"><button class="link" data-act="tlogin">Espace enseignant</button></p>';
+  }
   return h + '<button class="btn full" data-act="back">Retour</button>';
+}
+
+function accPanel() {
+  var C = cf(), list = draftUsers(), h = '<div class="panel"><p class="label">Accès élèves</p>';
+  if (REG.state === "loading") h += '<p class="lead">Chargement de la liste publiée…</p>';
+  else if (REG.state === "fail") h += '<p class="lead">La liste publiée (acces.json) n’a pas pu être lue ici. Tu peux créer des accès : télécharge ensuite le fichier et dépose-le à côté d’index.html.</p>';
+  if (!list.length) h += '<p class="lead">Aucun accès pour le moment.</p>';
+  list.forEach(function (e) {
+    var sum = (Array.isArray(e.g) ? e.g.length + " jeu(x)" : "tous les jeux") + (e.c === 0 ? "" : " · cartes") + (e.v === 0 ? "" : " · vocabulaire") + (e.b === 0 ? "" : " · bilan");
+    var pl = (store.plain || {})[e.u];
+    var sure = S.crev === e.u;
+    h += '<div class="acc' + (e.r ? " off" : "") + '"><div class="who"><b>' + esc(e.n || e.u) + (e.r ? " · révoqué" : "") + "</b><span>Utilisateur : " + esc(e.u) + " · Code : " + (pl ? esc(pl) : "—") + "</span><span>" + esc(sum) + "</span></div>";
+    if (e.r) h += '<button class="ico" data-act="restore" data-u="' + esc(e.u) + '" aria-label="Rétablir l’accès de ' + esc(e.n || e.u) + '" title="Rétablir">' + ICO_RESTORE + "</button>";
+    else h += '<button class="ico' + (sure ? " sure" : "") + '" data-act="revoke" data-u="' + esc(e.u) + '" aria-label="Révoquer l’accès de ' + esc(e.n || e.u) + '" title="Révoquer">' + (sure ? "Confirmer" : ICO_REVOKE) + "</button>";
+    h += "</div>";
+  });
+  if (dirty()) {
+    h += '<div class="warn"><b>Modifications non publiées</b><p>Pour qu’elles prennent effet : télécharge <code>acces.json</code> et remplace le fichier du même nom sur GitHub (Add file → Upload files, dans le dossier d’index.html, puis Commit). Les élèves révoqués perdent l’accès à leur prochain chargement de la page, après une à dix minutes environ.</p><button class="btn" data-act="dlreg">Télécharger acces.json</button><button class="btn ghost" data-act="copyreg">Copier son contenu</button><textarea id="regtxt" class="bilan" rows="5" readonly hidden></textarea><button class="btn ghost" data-act="reloadreg">Annuler mes modifications</button><p class="msg" id="regmsg"></p></div>';
+  }
+  h += '<p class="label">Nouvel accès</p>';
+  h += '<label class="label" for="au">Nom d’utilisateur</label><input id="au" class="inp" autocomplete="off" autocapitalize="off" spellcheck="false" maxlength="30" data-f="u" value="' + esc(C.u) + '">';
+  h += '<label class="label" for="ak">Code d’accès</label><input id="ak" class="inp" autocomplete="off" autocapitalize="off" spellcheck="false" maxlength="40" data-f="k" value="' + esc(C.k) + '">';
+  h += '<label class="label" for="cn">Prénom (affiché à l’élève)</label><input id="cn" class="inp" maxlength="30" autocomplete="off" data-f="n" value="' + esc(C.n) + '">';
+  GAMES.forEach(function (g) { h += '<label class="chk"><input type="checkbox" data-f="g:' + esc(g.id) + '"' + (C.g[g.id] ? " checked" : "") + "> " + esc(g.name) + "</label>"; });
+  h += '<label class="chk"><input type="checkbox" data-f="c"' + (C.c ? " checked" : "") + "> Cartes de révision</label>";
+  if (typeof PARTS !== "undefined") h += '<label class="chk"><input type="checkbox" data-f="v"' + (C.v ? " checked" : "") + "> Vocabulaire</label>";
+  h += '<label class="chk"><input type="checkbox" data-f="b"' + (C.b ? " checked" : "") + "> Mon bilan</label>";
+  h += '<button class="btn ghost" data-act="addacc">Créer l’accès</button><p class="msg" id="cgmsg">' + esc(S.cgmsg || "") + "</p></div>";
+  return h;
 }
 
 /* ---------- Espace enseignant ---------- */
@@ -721,7 +817,7 @@ function viewTLogin() {
 function viewTErr() {
   return '<h2>Accès refusé</h2><div class="panel"><p class="task">Ce nom d’utilisateur n’existe pas.</p><p class="lead">L’espace enseignant est réservé à son titulaire. Si tu es élève, entre plutôt ton code d’accès.</p></div><button class="btn full" data-act="home">Retour</button><button class="btn ghost full" data-act="tlogin">Réessayer</button>';
 }
-function cf() { if (!S.cf) { S.cf = { n: "", g: {}, c: 1, v: 1, b: 1 }; GAMES.forEach(function (g) { S.cf.g[g.id] = 1; }); } return S.cf; }
+function cf() { if (!S.cf) { S.cf = { n: "", u: "", k: "", g: {}, c: 1, v: 1, b: 1 }; GAMES.forEach(function (g) { S.cf.g[g.id] = 1; }); } return S.cf; }
 function stuList() {
   var T = store.teach || {};
   return Object.keys(T).map(function (k) { var r = T[k]; r.__k = k; return r; }).filter(function (r) { return r.snaps && r.snaps.length; }).sort(function (a, b) { return lastSnap(b).t < lastSnap(a).t ? -1 : 1; });
@@ -749,17 +845,9 @@ function stuDetail(r) {
   return h;
 }
 function viewTeacher() {
-  var C = cf(), h = '<h2>Espace enseignant</h2><p class="lead">Connecté : DStorm. Tes propres visites ne sont pas comptées.</p>';
+  var h = '<h2>Espace enseignant</h2><p class="lead">Connecté : DStorm. Tes propres visites ne sont pas comptées.</p>';
   h += '<div class="panel"><p class="label">Espace élève</p><p class="lead">Mini-jeux, cartes de révision, vocabulaire et bilan, tels que ton élève les voit.</p><button class="btn" data-act="preview">Ouvrir l’espace élève</button></div>';
-  h += '<div class="panel"><p class="label">Code d’accès élève</p><p class="lead">Sans code valide, l’élève ne voit aucun contenu. Le code affiche son prénom et choisit ce qui lui est proposé.</p>';
-  h += '<label class="label" for="cn">Prénom de l’élève</label><input id="cn" class="inp" maxlength="30" autocomplete="off" data-f="n" value="' + esc(C.n) + '">';
-  GAMES.forEach(function (g) { h += '<label class="chk"><input type="checkbox" data-f="g:' + esc(g.id) + '"' + (C.g[g.id] ? " checked" : "") + "> " + esc(g.name) + "</label>"; });
-  h += '<label class="chk"><input type="checkbox" data-f="c"' + (C.c ? " checked" : "") + "> Cartes de révision</label>";
-  if (typeof PARTS !== "undefined") h += '<label class="chk"><input type="checkbox" data-f="v"' + (C.v ? " checked" : "") + "> Vocabulaire</label>";
-  h += '<label class="chk"><input type="checkbox" data-f="b"' + (C.b ? " checked" : "") + "> Mon bilan</label>";
-  h += '<button class="btn ghost" data-act="mkcode">Créer le code</button><p class="msg" id="cgmsg">' + esc(S.cgmsg || "") + "</p>";
-  if (S.code) h += '<textarea id="codetxt" class="bilan" rows="3" readonly>' + esc(S.code) + '</textarea><button class="btn ghost" data-act="copycode">Copier le code</button><p class="msg" id="ccmsg"></p><p class="lead">Envoie ce code à l’élève : elle le colle à l’ouverture de la page.</p>';
-  h += "</div>";
+  h += accPanel();
   var L = stuList();
   h += '<div class="panel"><p class="label">Progression des élèves</p><p class="lead">L’élève ouvre « Mon bilan », copie son bilan et te l’envoie. Colle-le ici : ses résultats s’ajoutent à son historique.</p>';
   h += '<textarea id="imp" class="bilan" rows="4" placeholder="Colle ici le bilan reçu">' + esc(S.impTxt || "") + '</textarea><button class="btn ghost" data-act="timport">Importer ce bilan</button><p class="msg" id="impmsg">' + esc(S.tmsg || "") + "</p>";
@@ -775,7 +863,7 @@ function viewTeacher() {
 function importBilan(txt) {
   var o = parseBilan(txt);
   if (!o) return "Je ne trouve pas de code de bilan dans ce texte. Colle le bilan en entier, code compris.";
-  var name = (o.n || "").trim() || "Sans prénom", key = name.toLowerCase();
+  var name = (o.n || "").trim() || (o.u || "").trim() || "Sans prénom", key = (o.u || name).toLowerCase();
   var T = store.teach || (store.teach = {}), r = T[key] || (T[key] = { name: name, snaps: [], ev: [] });
   if (r.snaps.some(function (s) { return s.t === o.t; })) return "Ce bilan est déjà importé.";
   r.snaps.push({ t: o.t, v: o.v || 0, dy: o.dy || 0, last: o.last || "", g: o.g });
@@ -823,26 +911,44 @@ document.addEventListener("click", function (e) {
   if (a === "tdash") { stopUsage(); S.view = "teacher"; render(); return; }
   if (a === "preview") { S.view = "home"; render(); return; }
   if (a === "code") { S.cmsg = ""; S.view = "code"; render(); return; }
-  if (a === "codeoff") { store.acc = null; save(); S.cmsg = "Code retiré."; render(); return; }
+  if (a === "codeoff") { store.acc = null; store.name = ""; save(); S.cmsg = ""; S.view = "code"; render(); return; }
   if (a === "codeok") {
-    var o = readCode($("#cd").value);
-    if (!o) { S.cmsg = "Ce code n’est pas valide. Vérifie que tu l’as collé en entier."; render(); return; }
-    store.acc = { g: Array.isArray(o.g) ? o.g : null, c: o.c === 0 ? 0 : 1, v: o.v === 0 ? 0 : 1, b: o.b === 0 ? 0 : 1 };
-    if (o.n) store.name = String(o.n).slice(0, 30);
-    save(); S.cmsg = ""; S.view = "home"; render(); return;
+    var lu = norm($("#lu").value), lk = norm($("#cd").value);
+    if (!lu || !lk) { S.lu = lu; S.cmsg = "Remplis les deux champs."; render(); return; }
+    S.lu = lu;
+    if (REG.state === "ok") { tryLogin(lu, lk); return; }
+    S.cmsg = "Vérification…"; render();
+    loadReg().then(function () { if (REG.state !== "ok") { S.cmsg = "Impossible de vérifier ton accès pour le moment. Vérifie ta connexion et réessaie."; render(); } else tryLogin(lu, lk); });
+    return;
   }
   if (a === "savename") { var nm = $("#nm"); store.name = (nm.value || "").trim().slice(0, 30); save(); var nmm = $("#namemsg"); if (nmm) nmm.textContent = store.name ? "C’est noté, " + store.name + "." : "Prénom effacé."; return; }
-  if (a === "mkcode") {
-    var C = cf(), cn = $("#cn"); if (cn) C.n = cn.value;
+  if (a === "addacc") {
+    var C = cf(); ["au", "ak", "cn"].forEach(function (id) { var el = $("#" + id); if (el) C[{ au: "u", ak: "k", cn: "n" }[id]] = el.value; });
+    var nu = norm(C.u), nk = norm(C.k);
     var ids = GAMES.filter(function (g) { return C.g[g.id]; }).map(function (g) { return g.id; });
-    if (!ids.length) { S.cgmsg = "Coche au moins un jeu."; S.code = ""; render(); return; }
-    var oo = { n: (C.n || "").trim() }; if (ids.length < GAMES.length) oo.g = ids; if (!C.c) oo.c = 0; if (!C.v) oo.v = 0; if (!C.b) oo.b = 0;
-    S.cgmsg = ""; var b64 = enc(oo); S.code = "BVA2." + b64 + "." + sign(b64); render(); return;
+    var err = !/^[a-z0-9._-]{3,30}$/.test(nu) ? "Nom d’utilisateur : 3 caractères minimum, sans espace ni accent (lettres, chiffres, point, tiret)." : nk.length < 4 ? "Le code doit faire 4 caractères au minimum." : !ids.length ? "Coche au moins un jeu." : draftUsers().some(function (e) { return e.u === nu; }) ? "Ce nom d’utilisateur existe déjà." : "";
+    if (err) { S.cgmsg = err; render(); return; }
+    var en = { u: nu, h: hashCode(nu, nk), n: (C.n || "").trim() }; if (ids.length < GAMES.length) en.g = ids; if (!C.c) en.c = 0; if (!C.v) en.v = 0; if (!C.b) en.b = 0;
+    draft().users.push(en); store.plain[nu] = nk; save();
+    C.u = ""; C.k = ""; C.n = ""; S.cgmsg = "Accès créé pour « " + (en.n || nu) + " ». Il sera actif une fois acces.json publié."; render(); return;
   }
-  if (a === "copycode") {
-    var ta2 = $("#codetxt"), m2 = $("#ccmsg");
-    var fb = function () { ta2.focus(); ta2.select(); if (m2) m2.textContent = "Copie ce texte."; };
-    try { navigator.clipboard.writeText(S.code).then(function () { if (m2) m2.textContent = "Copié."; }, fb); } catch (x) { fb(); }
+  if (a === "revoke") {
+    var ru = b.getAttribute("data-u");
+    if (S.crev === ru) { draft().users.forEach(function (e) { if (e.u === ru) e.r = 1; }); save(); S.crev = null; } else S.crev = ru;
+    render(); return;
+  }
+  if (a === "restore") { var su = b.getAttribute("data-u"); draft().users.forEach(function (e) { if (e.u === su) delete e.r; }); save(); render(); return; }
+  if (a === "reloadreg") { store.reg = null; save(); S.crev = null; loadReg().then(render); render(); return; }
+  if (a === "dlreg") {
+    var rm = $("#regmsg");
+    try { var blob = new Blob([regJSON()], { type: "application/json" }), url = URL.createObjectURL(blob), lnk = document.createElement("a"); lnk.href = url; lnk.download = "acces.json"; document.body.appendChild(lnk); lnk.click(); setTimeout(function () { URL.revokeObjectURL(url); lnk.remove(); }, 500); if (rm) rm.textContent = "Fichier téléchargé. Si rien ne s’est passé, utilise « Copier son contenu »."; }
+    catch (x) { if (rm) rm.textContent = "Téléchargement impossible : utilise « Copier son contenu »."; }
+    return;
+  }
+  if (a === "copyreg") {
+    var rt = $("#regtxt"), rm2 = $("#regmsg"), txt3 = regJSON();
+    var fb2 = function () { rt.value = txt3; rt.hidden = false; rt.focus(); rt.select(); if (rm2) rm2.textContent = "Copie ce texte dans un fichier nommé acces.json."; };
+    try { navigator.clipboard.writeText(txt3).then(function () { if (rm2) rm2.textContent = "Copié. Colle-le dans un fichier acces.json."; }, fb2); } catch (x) { fb2(); }
     return;
   }
   if (a === "timport") { var im = $("#imp"); S.impTxt = ""; S.tmsg = importBilan(im ? im.value : ""); if (S.tmsg.indexOf("importé") < 0 || S.tmsg.indexOf("déjà") >= 0) S.impTxt = im ? im.value : ""; S.cdel = null; render(); return; }
@@ -1165,7 +1271,7 @@ registerGame({
 
 function onField(e) {
   var t = e.target, f = t && t.getAttribute && t.getAttribute("data-f"); if (!f) return;
-  var C = cf(); if (f === "n") C.n = t.value; else if (f.indexOf("g:") === 0) C.g[f.slice(2)] = t.checked ? 1 : 0; else C[f] = t.checked ? 1 : 0;
+  var C = cf(); if (f === "n" || f === "u" || f === "k") C[f] = t.value; else if (f.indexOf("g:") === 0) C.g[f.slice(2)] = t.checked ? 1 : 0; else C[f] = t.checked ? 1 : 0;
 }
 document.addEventListener("input", onField); document.addEventListener("change", onField);
 document.addEventListener("keydown", function (e) {
@@ -1175,7 +1281,7 @@ document.addEventListener("keydown", function (e) {
 
 load(); LOCAL = normLog(store.log); applySize(); S.view = store.tmode ? "teacher" : (store.acc ? "home" : "code"); render();
 track(opVisit());
-initNet();
+initNet(); loadReg();
 </script>
 
 </body>
