@@ -1,5 +1,10 @@
 <!doctype html>
-<html lang="fr"><head><meta charset="utf-8"><title>Le Bon Verbe</title><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<style>*,*::before,*::after{box-sizing:border-box}html{-webkit-text-size-adjust:100%}body{margin:0}</style>
+<title>Cours Particuliers avec Jérémy</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Lexend:wght@400;500;600;700&display=swap">
 <style>
@@ -42,7 +47,7 @@ body {
 button { font: inherit; color: inherit; cursor: pointer; }
 button:focus-visible { outline: 3px solid var(--fg); outline-offset: 2px; }
 .top { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
-.brand { white-space: nowrap; display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: 1.05rem; background: none; border: 0; padding: 4px 0; }
+.brand { text-align: left; line-height: 1.2; display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: .95rem; background: none; border: 0; padding: 4px 0; }
 .dots { display: flex; gap: 3px; }
 .dots i { width: 9px; height: 9px; border-radius: 50%; display: block; }
 .tools { display: flex; gap: 8px; }
@@ -166,7 +171,7 @@ details.stu summary { cursor: pointer; font-weight: 600; min-height: 32px; }
   <div class="top">
     <button class="brand" data-act="home" aria-label="Retour au menu">
       <span class="dots" aria-hidden="true"><i class="dec"></i><i class="exp"></i><i class="comp"></i><i class="just"></i><i class="ded"></i><i class="conc"></i></span>
-      Le Bon Verbe
+      Cours Particuliers avec Jérémy
     </button>
     <div class="tools">
       <button class="tool" data-act="size" aria-label="Changer la taille du texte">A+</button>
@@ -547,7 +552,7 @@ function startGame(id, items) {
 function viewHome() {
   var h = "";
   if (store.tmode) h += '<button class="btn ghost full" data-act="tdash">← Retour à l’espace enseignant</button>';
-  h += "<h1>" + (store.name ? "Salut " + esc(store.name) + " !" : "Le Bon Verbe") + "</h1><p class=\"lead\">Des mini-jeux pour réviser ta méthode et ton vocabulaire médical. Aucun chrono : tu prends ton temps.</p><div class=\"stack\">";
+  h += "<h1>" + (store.name ? "Salut " + esc(store.name) + " !" : "Cours Particuliers avec Jérémy") + "</h1><p class=\"lead\">Des mini-jeux pour réviser ta méthode et ton vocabulaire médical. Aucun chrono : tu prends ton temps.</p><div class=\"stack\">";
   var G = visibleGames();
   if (!G.length) h += "<p class=\"lead\">Aucun jeu pour le moment.</p>";
   G.forEach(function (g) {
@@ -558,7 +563,7 @@ function viewHome() {
   if (typeof PARTS !== "undefined" && can("v")) h += '<button class="btn ghost" data-act="vocab">Le vocabulaire</button>';
   if (can("b")) h += '<button class="btn ghost" data-act="bilan">Mon bilan</button>';
   h += "</div>";
-  h += '<p class="foot"><button class="link" data-act="code">J’ai un code</button> · <button class="link" data-act="tlogin">Espace enseignant</button></p>';
+  h += '<p class="foot"><button class="link" data-act="code">Mon code</button> · <button class="link" data-act="tlogin">Espace enseignant</button></p>';
   return h;
 }
 
@@ -654,6 +659,13 @@ function viewStats() {
 }
 
 /* ---------- Codes (bilan élève, accès élève) ---------- */
+var SALT = "cpj-2026-st2s";
+function sign(p) { var s = p + "|" + SALT, h = 5381, h2 = 52711; for (var i = 0; i < s.length; i++) { var c = s.charCodeAt(i); h = ((h * 33) ^ c) >>> 0; h2 = ((h2 * 31) + c * 7) >>> 0; } return h.toString(36) + h2.toString(36); }
+function readCode(txt) {
+  var m = /BVA2\.([A-Za-z0-9+\/=]+)\.([a-z0-9]+)/.exec(txt || ""); if (!m || sign(m[1]) !== m[2]) return null;
+  try { var o = dec(m[1]); return (o && typeof o === "object") ? o : null; } catch (e) { return null; }
+}
+function gated() { return !store.tmode && !store.acc; }
 function enc(o) { return btoa(unescape(encodeURIComponent(JSON.stringify(o)))); }
 function dec(s) { return JSON.parse(decodeURIComponent(escape(atob(s)))); }
 
@@ -677,7 +689,7 @@ function parseBilan(txt) {
   try { var o = dec(m[1]); return (o && o.g && typeof o.g === "object") ? o : null; } catch (e) { return null; }
 }
 function bilanText() {
-  var L = LOCAL, d = new Date(), t = "Bilan Le Bon Verbe" + (store.name ? " de " + store.name : "") + " du " + pad(d.getDate()) + "/" + pad(d.getMonth() + 1) + "/" + d.getFullYear() + "\n";
+  var L = LOCAL, d = new Date(), t = "Bilan Cours Particuliers" + (store.name ? " de " + store.name : "") + " du " + pad(d.getDate()) + "/" + pad(d.getMonth() + 1) + "/" + d.getFullYear() + "\n";
   t += "Visites : " + L.visits + " (sur " + Object.keys(L.days).length + " jour(s))\n";
   var ids = GAMES.map(function (g) { return g.id; }); Object.keys(L.games).forEach(function (id) { if (ids.indexOf(id) < 0) ids.push(id); });
   ids.forEach(function (id) { var g = L.games[id] || { open: 0, done: 0, ok: 0, n: 0 }; t += gameName(id) + " : " + g.open + " lancé(s), " + g.done + " terminé(s)" + (g.n ? ", réussite " + pct(g.ok, g.n) + " %" : "") + "\n"; });
@@ -694,15 +706,20 @@ function viewBilan() {
 
 /* ---------- Code d’accès (côté élève) ---------- */
 function viewCode() {
-  var a = store.acc, h = "<h2>J’ai un code</h2><p class=\"lead\">Ton professeur peut te donner un code. Colle-le ici : ton prénom s’affichera et les jeux prévus pour toi apparaîtront.</p>";
-  if (a) h += '<div class="panel"><p class="lead">Un code est déjà actif' + (store.name ? " pour " + esc(store.name) : "") + ".</p><button class=\"btn ghost\" data-act=\"codeoff\">Retirer mon code</button></div>";
-  h += '<div class="panel"><label class="label" for="cd">Mon code</label><input id="cd" class="inp" autocomplete="off" autocapitalize="off" spellcheck="false" data-enter="codeok" value=""><button class="btn" data-act="codeok">Valider</button><p class="msg" id="cmsg">' + esc(S.cmsg || "") + "</p></div>";
+  var g = gated(), h;
+  if (g) h = "<h1>Cours Particuliers avec Jérémy</h1><p class=\"lead\">Entre le code d’accès que ton professeur t’a donné.</p>";
+  else h = "<h2>Mon code</h2><p class=\"lead\">Un code d’accès est déjà actif" + (store.name ? " pour " + esc(store.name) : "") + ".</p><div class=\"panel\"><button class=\"btn ghost\" data-act=\"codeoff\">Retirer mon code</button></div>";
+  h += '<div class="panel"><label class="label" for="cd">Mon code d’accès</label><input id="cd" class="inp" autocomplete="off" autocapitalize="off" spellcheck="false" data-enter="codeok" value=""><button class="btn" data-act="codeok">Valider</button><p class="msg" id="cmsg">' + esc(S.cmsg || "") + "</p></div>";
+  if (g) return h + '<p class="foot"><button class="link" data-act="tlogin">Espace enseignant</button></p>';
   return h + '<button class="btn full" data-act="back">Retour</button>';
 }
 
 /* ---------- Espace enseignant ---------- */
 function viewTLogin() {
   return '<h2>Espace enseignant</h2><p class="lead">Entre ton nom d’utilisateur.</p><div class="panel"><label class="label" for="tu">Nom d’utilisateur</label><input id="tu" class="inp" autocomplete="off" autocapitalize="off" spellcheck="false" data-enter="tsubmit"><button class="btn" data-act="tsubmit">Entrer</button><p class="msg" id="tmsg"></p></div><button class="btn ghost full" data-act="home">Retour</button>';
+}
+function viewTErr() {
+  return '<h2>Accès refusé</h2><div class="panel"><p class="task">Ce nom d’utilisateur n’existe pas.</p><p class="lead">L’espace enseignant est réservé à son titulaire. Si tu es élève, entre plutôt ton code d’accès.</p></div><button class="btn full" data-act="home">Retour</button><button class="btn ghost full" data-act="tlogin">Réessayer</button>';
 }
 function cf() { if (!S.cf) { S.cf = { n: "", g: {}, c: 1, v: 1, b: 1 }; GAMES.forEach(function (g) { S.cf.g[g.id] = 1; }); } return S.cf; }
 function stuList() {
@@ -734,14 +751,14 @@ function stuDetail(r) {
 function viewTeacher() {
   var C = cf(), h = '<h2>Espace enseignant</h2><p class="lead">Connecté : DStorm. Tes propres visites ne sont pas comptées.</p>';
   h += '<div class="panel"><p class="label">Espace élève</p><p class="lead">Mini-jeux, cartes de révision, vocabulaire et bilan, tels que ton élève les voit.</p><button class="btn" data-act="preview">Ouvrir l’espace élève</button></div>';
-  h += '<div class="panel"><p class="label">Code d’accès élève</p><p class="lead">Facultatif. Le code affiche le prénom de l’élève et choisit ce qui lui est proposé. Sans code, elle voit tout.</p>';
+  h += '<div class="panel"><p class="label">Code d’accès élève</p><p class="lead">Sans code valide, l’élève ne voit aucun contenu. Le code affiche son prénom et choisit ce qui lui est proposé.</p>';
   h += '<label class="label" for="cn">Prénom de l’élève</label><input id="cn" class="inp" maxlength="30" autocomplete="off" data-f="n" value="' + esc(C.n) + '">';
   GAMES.forEach(function (g) { h += '<label class="chk"><input type="checkbox" data-f="g:' + esc(g.id) + '"' + (C.g[g.id] ? " checked" : "") + "> " + esc(g.name) + "</label>"; });
   h += '<label class="chk"><input type="checkbox" data-f="c"' + (C.c ? " checked" : "") + "> Cartes de révision</label>";
   if (typeof PARTS !== "undefined") h += '<label class="chk"><input type="checkbox" data-f="v"' + (C.v ? " checked" : "") + "> Vocabulaire</label>";
   h += '<label class="chk"><input type="checkbox" data-f="b"' + (C.b ? " checked" : "") + "> Mon bilan</label>";
   h += '<button class="btn ghost" data-act="mkcode">Créer le code</button><p class="msg" id="cgmsg">' + esc(S.cgmsg || "") + "</p>";
-  if (S.code) h += '<textarea id="codetxt" class="bilan" rows="3" readonly>' + esc(S.code) + '</textarea><button class="btn ghost" data-act="copycode">Copier le code</button><p class="msg" id="ccmsg"></p><p class="lead">Envoie ce code à l’élève : elle le colle dans « J’ai un code », en bas de l’accueil.</p>';
+  if (S.code) h += '<textarea id="codetxt" class="bilan" rows="3" readonly>' + esc(S.code) + '</textarea><button class="btn ghost" data-act="copycode">Copier le code</button><p class="msg" id="ccmsg"></p><p class="lead">Envoie ce code à l’élève : elle le colle à l’ouverture de la page.</p>';
   h += "</div>";
   var L = stuList();
   h += '<div class="panel"><p class="label">Progression des élèves</p><p class="lead">L’élève ouvre « Mon bilan », copie son bilan et te l’envoie. Colle-le ici : ses résultats s’ajoutent à son historique.</p>';
@@ -771,11 +788,13 @@ function importBilan(txt) {
 }
 
 function render() {
+  if (gated() && ["code", "tlogin", "terr"].indexOf(S.view) < 0) S.view = "code";
   var h, hb = $("#helpbtn");
-  if (hb) { var vv = S.view === "play" && S.g && S.g.help === "vocab"; hb.textContent = vv ? "Vocabulaire" : "Cartes"; hb.setAttribute("data-act", vv ? "vocab" : "cards"); hb.hidden = (["teacher", "tlogin", "code", "stats"].indexOf(S.view) >= 0) || (vv ? !can("v") : !can("c")); }
+  if (hb) { var vv = S.view === "play" && S.g && S.g.help === "vocab"; hb.textContent = vv ? "Vocabulaire" : "Cartes"; hb.setAttribute("data-act", vv ? "vocab" : "cards"); hb.hidden = (["teacher", "tlogin", "terr", "code", "stats"].indexOf(S.view) >= 0) || (vv ? !can("v") : !can("c")); }
   if (S.view === "home") h = viewHome();
   else if (S.view === "teacher") h = viewTeacher();
   else if (S.view === "tlogin") h = viewTLogin();
+  else if (S.view === "terr") h = viewTErr();
   else if (S.view === "code") h = viewCode();
   else if (S.view === "cards") h = viewCards();
   else if (S.view === "bilan") h = viewBilan();
@@ -797,7 +816,7 @@ document.addEventListener("click", function (e) {
   if (a === "tlogin") { stopUsage(); S.view = store.tmode ? "teacher" : "tlogin"; render(); return; }
   if (a === "tsubmit") {
     var u = ($("#tu").value || "").trim().toLowerCase(), tm = $("#tmsg");
-    if (u === "dstorm") { store.tmode = 1; save(); S.view = "teacher"; render(); } else if (tm) tm.textContent = "Nom d’utilisateur inconnu.";
+    if (u === "dstorm") { store.tmode = 1; save(); S.view = "teacher"; render(); } else { S.view = "terr"; render(); }
     return;
   }
   if (a === "tlogout") { store.tmode = 0; save(); S.view = "home"; render(); return; }
@@ -806,9 +825,8 @@ document.addEventListener("click", function (e) {
   if (a === "code") { S.cmsg = ""; S.view = "code"; render(); return; }
   if (a === "codeoff") { store.acc = null; save(); S.cmsg = "Code retiré."; render(); return; }
   if (a === "codeok") {
-    var m = /BVA1\.([A-Za-z0-9+\/=]+)/.exec($("#cd").value || ""), o = null;
-    try { o = m ? dec(m[1]) : null; } catch (x) { o = null; }
-    if (!o || typeof o !== "object") { S.cmsg = "Ce code ne marche pas. Vérifie que tu l’as collé en entier."; render(); return; }
+    var o = readCode($("#cd").value);
+    if (!o) { S.cmsg = "Ce code n’est pas valide. Vérifie que tu l’as collé en entier."; render(); return; }
     store.acc = { g: Array.isArray(o.g) ? o.g : null, c: o.c === 0 ? 0 : 1, v: o.v === 0 ? 0 : 1, b: o.b === 0 ? 0 : 1 };
     if (o.n) store.name = String(o.n).slice(0, 30);
     save(); S.cmsg = ""; S.view = "home"; render(); return;
@@ -819,7 +837,7 @@ document.addEventListener("click", function (e) {
     var ids = GAMES.filter(function (g) { return C.g[g.id]; }).map(function (g) { return g.id; });
     if (!ids.length) { S.cgmsg = "Coche au moins un jeu."; S.code = ""; render(); return; }
     var oo = { n: (C.n || "").trim() }; if (ids.length < GAMES.length) oo.g = ids; if (!C.c) oo.c = 0; if (!C.v) oo.v = 0; if (!C.b) oo.b = 0;
-    S.cgmsg = ""; S.code = "BVA1." + enc(oo); render(); return;
+    S.cgmsg = ""; var b64 = enc(oo); S.code = "BVA2." + b64 + "." + sign(b64); render(); return;
   }
   if (a === "copycode") {
     var ta2 = $("#codetxt"), m2 = $("#ccmsg");
@@ -1155,9 +1173,10 @@ document.addEventListener("keydown", function (e) {
   var btn = document.querySelector('[data-act="' + d + '"]'); if (btn) { e.preventDefault(); btn.click(); }
 });
 
-load(); LOCAL = normLog(store.log); applySize(); if (store.tmode) S.view = "teacher"; render();
+load(); LOCAL = normLog(store.log); applySize(); S.view = store.tmode ? "teacher" : (store.acc ? "home" : "code"); render();
 track(opVisit());
 initNet();
 </script>
 
-</body></html>
+</body>
+</html>
