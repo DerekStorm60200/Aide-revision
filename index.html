@@ -1,9 +1,4 @@
-<!doctype html>
-<html lang="fr">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<style>*,*::before,*::after{box-sizing:border-box}html{-webkit-text-size-adjust:100%}body{margin:0}</style>
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
 <title>Cours Particuliers avec Jérémy</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Lexend:wght@400;500;600;700&display=swap">
@@ -174,6 +169,7 @@ details.stu { border: 1.5px solid var(--line); border-radius: 14px; padding: 10p
 .warn { border: 2px solid var(--suf, #d97706); border-radius: 14px; padding: 12px; display: flex; flex-direction: column; gap: 10px; }
 .warn p { margin: 0; font-size: .9rem; }
 details.stu summary { cursor: pointer; font-weight: 600; min-height: 32px; }
+@media (max-width: 420px) { .tools { gap: 5px; } .tool { padding: 0 9px; font-size: .78rem; } .brand { font-size: .85rem; } }
 </style>
 
 <div class="wrap">
@@ -183,6 +179,7 @@ details.stu summary { cursor: pointer; font-weight: 600; min-height: 32px; }
       Cours Particuliers avec Jérémy
     </button>
     <div class="tools">
+      <button class="tool" id="homebtn" data-act="home">Accueil</button>
       <button class="tool" data-act="size" aria-label="Changer la taille du texte">A+</button>
       <button class="tool" id="helpbtn" data-act="cards">Cartes</button>
     </div>
@@ -551,34 +548,53 @@ function draw(g) {
 }
 function startGame(id, items) {
   var g = gameById(id); if (!g) return;
-  stopUsage(); S.g = g; track(opOpen(id));
+  stopUsage(); S.g = g; S.subj = subjOf(id); track(opOpen(id));
   if (g.mount) { S.view = "custom"; S.prev = "home"; render(); return; }
   var q = items || draw(g);
   if (g.prep) q = g.prep(q);
   S.queue = q; S.i = 0; S.res = []; S.view = "play"; S.q = g.reset(q[0], E); render();
 }
 
+/* Matières : les jeux « pc- » sont en Physique-Chimie, tous les autres en SVT. */
+var SUBJECTS = [{ id: "svt", name: "SVT", bg: "var(--exp)" }, { id: "pc", name: "Physique-Chimie", bg: "var(--dec)" }];
+function subjOf(id) { return id.indexOf("pc-") === 0 ? "pc" : "svt"; }
+function gamesOf(s) { return visibleGames().filter(function (g) { return subjOf(g.id) === s; }); }
+function teacherBack() { return store.tmode ? '<button class="btn ghost full" data-act="tdash">← Retour à l’espace enseignant</button>' : ""; }
+
 function viewHome() {
-  var h = "";
-  if (store.tmode) h += '<button class="btn ghost full" data-act="tdash">← Retour à l’espace enseignant</button>';
-  h += "<h1>" + (store.name ? "Salut " + esc(store.name) + " !" : "Cours Particuliers avec Jérémy") + "</h1><p class=\"lead\">Des mini-jeux pour réviser ta méthode et ton vocabulaire médical. Aucun chrono : tu prends ton temps.</p><div class=\"stack\">";
-  var G = visibleGames();
-  if (!G.length) h += "<p class=\"lead\">Aucun jeu pour le moment.</p>";
-  G.forEach(function (g) {
+  var h = teacherBack();
+  if (store.name) h += '<p class="lead">Salut ' + esc(store.name) + " !</p>";
+  h += '<h1>Quel cours veux-tu travailler aujourd’hui ?</h1><div class="stack">';
+  var L = SUBJECTS.filter(function (s) { return gamesOf(s.id).length; });
+  if (!L.length) h += '<p class="lead">Aucun jeu pour le moment.</p>';
+  L.forEach(function (s) {
+    h += '<button class="btn full" style="min-height:6.5rem;font-size:1.5rem;color:var(--on-ink);background:' + s.bg + '" data-act="subject" data-subj="' + s.id + '">' + s.name + "</button>";
+  });
+  h += "</div>";
+  if (can("b")) h += '<button class="btn ghost full" data-act="bilan">Mon bilan</button>';
+  h += '<p class="foot"><button class="link" data-act="code">Mon compte</button> · <button class="link" data-act="tlogin">Espace enseignant</button></p>';
+  return h;
+}
+
+function viewSubject() {
+  var s = SUBJECTS.filter(function (x) { return x.id === S.subj; })[0] || SUBJECTS[0];
+  var h = teacherBack() + "<h1>" + s.name + '</h1><p class="lead">Choisis un mini-jeu. Aucun chrono : tu prends ton temps.</p><div class="stack">';
+  gamesOf(s.id).forEach(function (g) {
     h += '<button class="mode" data-act="start" data-game="' + esc(g.id) + '"><div><b>' + esc(g.name) + "</b><span>" + esc(g.desc) + "</span></div>" + stars(store.best[g.id] || 0) + "</button>";
   });
-  h += '</div><div class="row">';
-  if (can("c")) h += '<button class="btn ghost" data-act="cards">Revoir les cartes</button>';
-  if (typeof PARTS !== "undefined" && can("v")) h += '<button class="btn ghost" data-act="vocab">Le vocabulaire</button>';
-  if (can("b")) h += '<button class="btn ghost" data-act="bilan">Mon bilan</button>';
   h += "</div>";
-  h += '<p class="foot"><button class="link" data-act="code">Mon compte</button> · <button class="link" data-act="tlogin">Espace enseignant</button></p>';
+  if (s.id === "svt") {
+    h += '<div class="row">';
+    if (can("c")) h += '<button class="btn ghost" data-act="cards">Revoir les cartes</button>';
+    if (typeof PARTS !== "undefined" && can("v")) h += '<button class="btn ghost" data-act="vocab">Le vocabulaire</button>';
+    h += "</div>";
+  }
   return h;
 }
 
 function viewEnd() {
   var I = S.endInfo, st = I.st, ok = I.ok, n = I.n;
-  var msg = st === 3 ? "Série parfaite." : st === 2 ? "Presque parfait : une seule erreur." : st === 1 ? "Bon début. Les verbes ratés reviennent ci-dessous." : "Ce n’est pas grave : c’est comme ça qu’on apprend. Regarde les cartes, puis rejoue.";
+  var msg = st === 3 ? "Série parfaite." : st === 2 ? "Presque parfait : une seule erreur." : st === 1 ? "Bon début. Les questions ratées sont ci-dessous." : "Ce n’est pas grave : c’est comme ça qu’on apprend. Regarde les cartes, puis rejoue.";
   var h = '<div class="panel center"><p class="label">' + esc(S.g.name) + "</p>" + stars(st, "big-stars") + "<h2>" + ok + " sur " + n + " du premier coup</h2><p class=\"lead\">" + msg + "</p></div>";
   var missed = S.res.filter(function (r) { return !r.ok; });
   if (missed.length && S.g.missed) {
@@ -588,7 +604,7 @@ function viewEnd() {
   }
   h += '<div class="row">';
   if (missed.length) h += '<button class="btn" data-act="retry">Rejouer les ratés</button>';
-  h += '<button class="btn' + (missed.length ? " ghost" : "") + '" data-act="again">Nouvelle série</button><button class="btn ghost" data-act="home">Menu</button></div>';
+  h += '<button class="btn' + (missed.length ? " ghost" : "") + '" data-act="again">Nouvelle série</button><button class="btn ghost" data-act="subject" data-subj="' + subjOf(S.g.id) + '">Autres jeux</button></div>';
   return h;
 }
 
@@ -879,7 +895,12 @@ function render() {
   if (gated() && ["code", "tlogin", "terr"].indexOf(S.view) < 0) S.view = "code";
   var h, hb = $("#helpbtn");
   if (hb) { var vv = S.view === "play" && S.g && S.g.help === "vocab"; hb.textContent = vv ? "Vocabulaire" : "Cartes"; hb.setAttribute("data-act", vv ? "vocab" : "cards"); hb.hidden = (["teacher", "tlogin", "terr", "code", "stats"].indexOf(S.view) >= 0) || (vv ? !can("v") : !can("c")); }
+  var locked = ["code", "tlogin", "terr", "teacher", "stats"].indexOf(S.view) >= 0;
+  $("#homebtn").hidden = ["code", "tlogin", "terr"].indexOf(S.view) >= 0;
+  /* Les cartes de verbes ne concernent que la SVT. */
+  if (hb && !locked && (S.view === "home" || (S.view === "subject" && S.subj === "pc") || ((S.view === "play" || S.view === "end") && S.g && subjOf(S.g.id) === "pc"))) hb.hidden = true;
   if (S.view === "home") h = viewHome();
+  else if (S.view === "subject") h = viewSubject();
   else if (S.view === "teacher") h = viewTeacher();
   else if (S.view === "tlogin") h = viewTLogin();
   else if (S.view === "terr") h = viewTErr();
@@ -963,6 +984,7 @@ document.addEventListener("click", function (e) {
   }
   if (a === "back") { stopUsage(); S.view = (S.prev === "custom" ? "home" : S.prev) || "home"; render(); return; }
   if (a === "home") { stopUsage(); S.view = "home"; render(); return; }
+  if (a === "subject") { stopUsage(); S.subj = b.getAttribute("data-subj"); S.view = "subject"; render(); return; }
   if (a === "start") { startGame(b.getAttribute("data-game")); return; }
   if (a === "again") { startGame(S.g.id); return; }
   if (a === "retry") { startGame(S.g.id, S.res.filter(function (r) { return !r.ok; }).map(function (r) { return r.item; })); return; }
@@ -1262,6 +1284,113 @@ registerGame({
   missed: function (it, E) { return "<span><b>" + E.esc(it.s) + "</b> (dans " + E.esc(it.w.w) + ")</span><span>" + E.esc(it.part.m) + "</span>"; }
 });
 
+/* ================= PHYSIQUE-CHIMIE — Thème 1 : Prévenir et sécuriser =================
+   Pictogrammes : https://orme-conseil.com/pictogramme-chimique/ (dessins simplifiés). */
+(function () {
+  var K = 'fill="#111" stroke="none"', L = 'fill="none" stroke="#111" stroke-width="5" stroke-linecap="round"';
+  var FLAME = "M50 22C54 36 70 42 68 58C67 69 59 73 50 73C40 73 32 67 32 57C32 49 38 45 40 38C44 44 44 48 46 50C52 42 48 32 50 22Z";
+  var P = [
+    { c: "SGH01", n: "Explosif", m: "Ça peut exploser", clue: "Bombe qui éclate : choc, chaleur ou étincelle peuvent la faire exploser.",
+      d: '<circle cx="46" cy="62" r="13" '+K+'/><path d="M52 50L50 26M60 53L74 36M62 62L78 60M40 49L30 34M34 55L22 50" '+L+'/>' },
+    { c: "SGH02", n: "Inflammable", m: "Ça peut prendre feu", clue: "Une flamme seule : le produit peut s’enflammer.",
+      d: '<path d="'+FLAME+'" '+K+'/><path d="M30 79H70" '+L+'/>' },
+    { c: "SGH03", n: "Comburant", m: "Ça fait brûler plus fort", clue: "Flamme sur un rond : le produit provoque ou aggrave un incendie.",
+      d: '<g transform="translate(15 6) scale(.7)"><path d="'+FLAME+'" '+K+'/></g><circle cx="50" cy="66" r="11" '+L+'/><path d="M30 80H70" '+L+'/>' },
+    { c: "SGH04", n: "Gaz sous pression", m: "Gaz comprimé dans un récipient", clue: "La bouteille de gaz : elle peut exploser si on la chauffe.",
+      d: '<g transform="rotate(-20 50 55)"><rect x="25" y="47" width="42" height="17" rx="8" '+K+'/><rect x="66" y="51" width="10" height="9" '+K+'/></g><path d="M28 74H74" '+L+'/>' },
+    { c: "SGH05", n: "Corrosif", m: "Ça ronge la peau, les yeux ou les métaux", clue: "Des gouttes qui creusent : brûlure de la peau, des yeux, attaque des métaux.",
+      d: '<path d="M25 31L44 40M75 31L56 40" '+L+'/><path d="M43 46l-4 9h8zM57 46l-4 9h8z" '+K+'/><path d="M23 66h14l4-6 4 6h4v7H23zM56 68q12-9 22 0v5H56z" '+K+'/>' },
+    { c: "SGH06", n: "Toxicité aiguë", m: "Poison : peut tuer, même à petite dose", clue: "Tête de mort : empoisonne vite, même en petite quantité.",
+      d: '<path d="M50 22c-13 0-20 8-20 18 0 7 4 10 8 12v7h24v-7c4-2 8-5 8-12 0-10-7-18-20-18z" '+K+'/><circle cx="42" cy="41" r="5" fill="#fff"/><circle cx="58" cy="41" r="5" fill="#fff"/><path d="M32 63L68 79M68 63L32 79" '+L+'/>' },
+    { c: "SGH07", n: "Nocif ou irritant", m: "Ça irrite ou c’est nocif à forte dose", clue: "Point d’exclamation : irritation, allergie de la peau, somnolence, vertiges.",
+      d: '<path d="M43 25h14l-3 36h-8z" '+K+'/><circle cx="50" cy="73" r="7" '+K+'/>' },
+    { c: "SGH08", n: "Danger grave pour la santé", m: "Effet grave : cancer, fertilité, organes, poumons", clue: "Silhouette avec une étoile sur la poitrine : atteinte grave du corps.",
+      d: '<circle cx="50" cy="30" r="9" '+K+'/><path d="M32 80V54q2-12 18-12t18 12v26z" '+K+'/><path d="M50 46l3 10 11-3-8 9 8 8-11-1-3 11-3-11-11 1 8-8-8-9 11 3z" fill="#fff"/>' },
+    { c: "SGH09", n: "Danger pour l’environnement", m: "Ça pollue l’eau et tue les êtres vivants aquatiques", clue: "Arbre mort et poisson mort : danger pour la nature et l’eau.",
+      d: '<path d="M36 70V30M36 46L24 34M36 52L49 37M36 37L45 27" '+L+'/><path d="M46 66q12-13 26 0-14 13-26 0zM70 66l10-8v16z" '+K+'/><path d="M22 76H60" '+L+'/>' }
+  ];
+  function picto(i, size) {
+    return '<svg viewBox="0 0 100 100" width="' + size + '" height="' + size + '" aria-hidden="true" style="max-width:100%;flex:none;display:block;margin:0 auto"><path d="M50 3L97 50 50 97 3 50Z" fill="#fff" stroke="#d3121a" stroke-width="6"/>' + P[i].d + "</svg>";
+  }
+
+  /* Moule commun : une question, des boutons, un retour expliqué. */
+  function qcm(o) {
+    registerGame({
+      id: o.id, name: o.name, desc: o.desc, n: o.n, pool: o.pool,
+      prep: function (items) { return items.map(function (x) { var src = x.src !== undefined ? x.src : x, q = o.make(src); q.src = src; return q; }); },
+      reset: function () { return { done: false, picked: null }; },
+      view: function (it, q, E) {
+        var speak = it.say; it.o.forEach(function (x, i) { speak += " Réponse " + (i + 1) + " : " + x.say; });
+        var h = E.head() + '<div class="panel center">' + it.top + E.listen(speak) + '</div><div class="' + (o.grid ? "verbs" : "stack") + '">';
+        it.o.forEach(function (x, i) {
+          var cls = "opt"; if (q.done) { if (x.ok) cls += " right"; else if (i === q.picked) cls += " wrong"; }
+          h += '<button class="' + cls + '"' + (o.grid ? ' style="text-align:center"' : "") + ' aria-label="' + E.esc(o.grid && !q.done ? "Réponse " + (i + 1) + " : " + x.say : x.say) + '" data-act="pickPC" data-i="' + i + '"' + (q.done ? " disabled" : "") + ">" + x.h + "</button>";
+        });
+        h += "</div>";
+        if (q.done) { var ok = it.o[q.picked].ok; h += '<div class="fb' + (ok ? "" : " no") + '"><b>' + (ok ? "✓ Oui." : "✗ Pas tout à fait.") + " " + E.esc(it.answer) + "</b><p>" + E.esc(it.clue) + "</p></div>" + E.nextBtn(); }
+        return h;
+      },
+      act: function (a, b, it, q, E) { if (a !== "pickPC" || q.done) return; var i = +b.getAttribute("data-i"); q.picked = i; E.finish(it.o[i].ok); E.render(); },
+      missed: function (it, E) { return "<span>" + E.esc(it.say) + "</span><span><b>" + E.esc(it.answer) + "</b></span>"; }
+    });
+  }
+  var IDX = [0, 1, 2, 3, 4, 5, 6, 7, 8];
+  function others(i) { return shuffle(IDX.filter(function (j) { return j !== i; })).slice(0, 3); }
+
+  qcm({ id: "pc-picto-danger", name: "Picto : quel danger ?", desc: "Je vois un pictogramme et je trouve le danger.", n: 5, pool: IDX,
+    make: function (i) { return { say: "Que veut dire ce pictogramme ?", top: picto(i, 150) + '<p class="task">Quel est le danger ?</p>',
+      answer: P[i].n + " (" + P[i].c + ").", clue: P[i].clue,
+      o: shuffle([i].concat(others(i))).map(function (j) { return { ok: j === i, say: P[j].m, h: esc(P[j].m) }; }) }; } });
+
+  /* [situation, index du pictogramme] — formulées sur le danger, car un vrai produit porte souvent plusieurs pictos */
+  var SIT = [
+    ["Un choc ou une étincelle peut tout faire sauter.", 0], ["La vapeur de ce liquide s’enflamme près d’une bougie.", 1],
+    ["Ce produit rend un incendie beaucoup plus fort.", 2], ["Cette bouteille contient un gaz comprimé.", 3],
+    ["Une goutte sur la peau la brûle et la détruit.", 4], ["Avaler une très petite quantité peut tuer.", 5],
+    ["Ce produit pique les yeux et irrite la peau.", 6], ["Ce produit peut provoquer un cancer.", 7],
+    ["Jeté dans une rivière, ce produit tue les poissons.", 8], ["Respirer ce produit donne des vertiges et endort.", 6],
+    ["Ce produit attaque et ronge les métaux.", 4], ["Ce produit peut nuire à la fertilité.", 7]
+  ];
+  qcm({ id: "pc-picto-trouve", name: "Trouve le picto", desc: "Je lis une situation et je choisis le pictogramme.", n: 5, pool: SIT, grid: true,
+    make: function (s) { var i = s[1]; return { say: s[0], top: '<p class="task">' + esc(s[0]) + "</p>",
+      answer: P[i].n + " (" + P[i].c + ").", clue: P[i].clue,
+      o: shuffle([i].concat(others(i))).map(function (j) { return { ok: j === i, say: P[j].n, h: picto(j, 96) }; }) }; } });
+
+  /* [produit, pH approximatif] */
+  var PH = [["Jus de citron", 2], ["Vinaigre", 3], ["Eau pure à 25 °C", 7], ["Eau savonneuse", 10], ["Eau de Javel", 11], ["Déboucheur à la soude", 13], ["Suc de l’estomac", 2], ["Eau salée à 25 °C", 7]];
+  function phBar(v) {
+    var col = ["#b91c1c","#dc2626","#ea580c","#f97316","#f59e0b","#eab308","#84cc16","#16a34a","#0d9488","#0891b2","#0284c7","#2563eb","#4f46e5","#6d28d9","#581c87"];
+    return '<div role="img" aria-label="pH ' + v + ' sur une échelle de 0 à 14" style="display:flex;width:100%;gap:2px;align-items:flex-end">' + col.map(function (c, i) {
+      return '<i style="flex:1;display:block;background:' + c + ";height:" + (i === v ? 34 : 14) + "px;border:" + (i === v ? "2px solid var(--fg)" : "0") + '"></i>'; }).join("") +
+      '</div><div aria-hidden="true" style="display:flex;width:100%;gap:2px;font-size:.7rem;font-variant-numeric:tabular-nums">' + col.map(function (c, i) {
+      return '<span style="flex:1;min-width:0;text-align:center' + (i === v ? ";font-weight:700;text-decoration:underline" : "") + '">' + i + "</span>"; }).join("") + "</div>";
+  }
+  qcm({ id: "pc-ph", name: "Acide, neutre ou basique ?", desc: "Je lis le pH sur l’échelle de couleurs.", n: 5, pool: PH,
+    make: function (p) { var v = p[1], r = v < 7 ? "Acide" : v > 7 ? "Basique" : "Neutre";
+      return { say: p[0] + ", pH environ " + v + ".", top: '<h2>' + esc(p[0]) + '</h2><p class="task">pH ≈ <b>' + v + "</b></p>" + phBar(v),
+        answer: r + ".", clue: "Moins de 7 : acide. Égal à 7 : neutre (à 25 °C). Plus de 7 : basique.",
+        o: ["Acide", "Neutre", "Basique"].map(function (t) { return { ok: t === r, say: t, h: t }; }) }; } });
+
+  /* [affirmation, vrai ?, explication] */
+  var VF = [
+    ["On peut mélanger eau de Javel et détartrant pour mieux nettoyer.", false, "Jamais : le mélange dégage du dichlore, un gaz toxique."],
+    ["Si de l’acide touche la peau, je rince longtemps à l’eau.", true, "Rinçage abondant et prolongé, puis avis médical (15 ou 112)."],
+    ["Le corps humain conduit l’électricité.", true, "C’est pour cela qu’on risque l’électrisation."],
+    ["On peut utiliser un sèche-cheveux les pieds dans l’eau.", false, "L’eau augmente fortement le risque d’électrisation."],
+    ["Un disjoncteur coupe le courant en cas de problème.", true, "Il ouvre le circuit, par exemple si l’intensité devient trop forte."],
+    ["La prise de terre sert à protéger les personnes.", true, "Elle évacue vers le sol le courant de fuite d’un appareil."],
+    ["En France, la tension du secteur est d’environ 12 volts.", false, "Elle vaut environ 230 volts, à 50 hertz."],
+    ["Le corps humain émet des rayons infrarouges.", true, "Invisibles et sans danger. Certains détecteurs les repèrent."],
+    ["Les infrarouges sont visibles à l’œil nu.", false, "Ils sont hors du domaine visible."],
+    ["La distance d’arrêt, c’est seulement la distance de freinage.", false, "Distance d’arrêt = distance de réaction + distance de freinage."],
+    ["Sur route mouillée, la distance de freinage augmente.", true, "Les pneus adhèrent moins."],
+    ["Si je roule 2 fois plus vite, l’énergie cinétique est 4 fois plus grande.", true, "La vitesse est au carré : 2 × 2 = 4."]
+  ];
+  qcm({ id: "pc-vrai-faux", name: "Sécurité : vrai ou faux ?", desc: "Maison et route : je démêle le vrai du faux.", n: 6, pool: VF,
+    make: function (s) { return { say: s[0], top: '<p class="task">' + esc(s[0]) + "</p>", answer: "C’est " + (s[1] ? "vrai." : "faux."), clue: s[2],
+      o: [true, false].map(function (b) { var t = b ? "Vrai" : "Faux"; return { ok: b === s[1], say: t, h: t }; }) }; } });
+})();
+
 /* ===== AJOUTER UN JEU : insérer un nouveau registerGame({...}) juste au-dessus de cette ligne =====
    Jeu à questions : { id, name, desc, n, pool, prep?, reset(it,E), view(it,q,E), act(a,btn,it,q,E), missed(it,E) }
      view renvoie du HTML ; les boutons portent data-act="..." ; act appelle E.finish(ok) puis E.render().
@@ -1284,5 +1413,4 @@ track(opVisit());
 initNet(); loadReg();
 </script>
 
-</body>
-</html>
+</body></html>
